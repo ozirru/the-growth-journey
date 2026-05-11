@@ -297,6 +297,13 @@ body{min-height:100vh;font-family:'Crimson Pro',Georgia,serif;font-size:17px;col
     <div class="all-done-sub">Like Himmel would say — today was a good day. You gave it your all.</div>
   </div>
 
+  <!-- Day Slider -->
+  <div class="day-slider" id="daySlider">
+    <button class="day-slider-btn" onclick="shiftDay(-1)">‹</button>
+    <div class="day-tabs" id="dayTabs"></div>
+    <button class="day-slider-btn" onclick="shiftDay(1)">›</button>
+  </div>
+
   <div class="quests-grid">
     <div class="panel quest-panel main">
       <div class="quest-panel-header">
@@ -417,9 +424,61 @@ body{min-height:100vh;font-family:'Crimson Pro',Georgia,serif;font-size:17px;col
   </div>
 </div>
 
-<div class="completion-overlay">
+<!-- Pomodoro Timer -->
+  <div class="pomo-wrap">
+    <div class="panel pomo-panel">
+      <div class="pomo-header">
+        <div class="pomo-title">⏱ Focus Timer</div>
+        <div class="pomo-mode-tabs">
+          <button class="pomo-mode-btn active" onclick="setPomoMode('focus',this)">Focus</button>
+          <button class="pomo-mode-btn" onclick="setPomoMode('short',this)">Short Break</button>
+          <button class="pomo-mode-btn" onclick="setPomoMode('long',this)">Long Break</button>
+        </div>
+      </div>
+      <div class="pomo-display">
+        <div class="pomo-ring-wrap">
+          <canvas id="pomoCanvas" width="140" height="140"></canvas>
+          <div class="pomo-time">
+            <div class="pomo-time-text" id="pomoTimeText">25:00</div>
+            <div class="pomo-time-label" id="pomoTimeLabel">Focus</div>
+          </div>
+        </div>
+        <div class="pomo-session-dots" id="pomoSessionDots"></div>
+        <div class="pomo-controls">
+          <button class="pomo-btn pomo-btn-secondary" onclick="pomoSkip()" title="Skip">⏭</button>
+          <button class="pomo-btn pomo-btn-main" id="pomoPlayBtn" onclick="pomoToggle()">▶</button>
+          <button class="pomo-btn pomo-btn-secondary" onclick="pomoReset()" title="Reset">↺</button>
+        </div>
+      </div>
+      <div class="pomo-quest-link" id="pomoQuestLink" onclick="linkPomoQuest()">
+        <span>🎯</span>
+        <span class="ql-name" id="pomoQuestName">Link to a quest...</span>
+        <span style="font-size:11px;color:var(--text-pale)">›</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="completion-overlay">
   <div class="particles" id="particles"></div>
   <div class="cbanner" id="cbanner"></div>
+</div>
+
+<!-- All Clear Overlay -->
+<div id="allClearOverlay">
+  <canvas id="allClearStars"></canvas>
+  <div class="all-clear-box">
+    <div class="all-clear-glyph">✦</div>
+    <div class="all-clear-title">All Quests Cleared</div>
+    <div class="all-clear-sub" id="allClearSub">Today's journey is complete.<br>You showed up. That matters.</div>
+    <div class="all-clear-tomorrow" id="allClearTomorrow" style="display:none">
+      <div class="all-clear-tomorrow-title">Tomorrow's quests</div>
+      <div id="allClearTomorrowList"></div>
+    </div>
+    <div class="all-clear-btns">
+      <button class="ac-btn-primary" onclick="goToTomorrow()">See Tomorrow ›</button>
+      <button class="ac-btn-secondary" onclick="closeAllClear()">Rest for now</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -431,15 +490,14 @@ const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 const CORRECT_PW    = 'ozirru';
 
 async function sbFetch(path, method='GET', body=null) {
+  const headers = {
+    'apikey': SUPABASE_KEY,
+    'Authorization': 'Bearer ' + SUPABASE_KEY,
+    'Content-Type': 'application/json',
+  };
+  if (method !== 'DELETE') headers['Prefer'] = 'return=representation';
   const r = await fetch(SUPABASE_URL + '/rest/v1/' + path, {
-    method,
-    headers: {
-      'apikey': SUPABASE_KEY,
-      'Authorization': 'Bearer ' + SUPABASE_KEY,
-      'Content-Type': 'application/json',
-      'Prefer': 'return=representation'
-    },
-    body: body ? JSON.stringify(body) : null
+    method, headers, body: body ? JSON.stringify(body) : null
   });
   if (!r.ok) throw new Error(await r.text());
   const t = await r.text();
@@ -881,6 +939,501 @@ function initMotes(){
   }
 }
 
+// ── Day Slider ─────────────────────────────
+let currentDateOffset = 0; // 0 = today, 1 = tomorrow, -1 = yesterday
+let dayQuestCache = {};
+
+function todayPlusOffset(offset) {
+  const d = new Date();
+  d.setDate(d.getDate() + offset);
+  return d.toISOString().split('T')[0];
+}
+
+function formatDayTab(offset) {
+  if (offset === -1) return 'Yesterday';
+  if (offset === 0) return 'Today';
+  if (offset === 1) return 'Tomorrow';
+  const d = new Date();
+  d.setDate(d.getDate() + offset);
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${days[d.getDay()]} ${d.getDate()} ${months[d.getMonth()]}`;
+}
+
+async function initDaySlider() {
+  await renderDayTabs();
+}
+
+async function renderDayTabs() {
+  const tabs = document.getElementById('dayTabs');
+  tabs.innerHTML = '';
+  const offsets = [-1, 0, 1, 2, 3];
+  for (const off of offsets) {
+    const ds = todayPlusOffset(off);
+    // Fetch quest count for this day
+    let count = 0, doneCount = 0;
+    try {
+      if (!dayQuestCache[ds]) {
+        const data = await sbFetch(`quests?quest_date=eq.${ds}&order=start_time.asc`);
+        dayQuestCache[ds] = data || [];
+      }
+      count = dayQuestCache[ds].length;
+      doneCount = dayQuestCache[ds].filter(q => q.status === 'done').length;
+    } catch(e) {}
+
+    const btn = document.createElement('button');
+    btn.className = 'day-tab' + (off === currentDateOffset ? ' active' : '') +
+      (count > 0 && doneCount < count ? ' has-quests' : '') +
+      (count > 0 && doneCount === count ? ' all-done' : '');
+    btn.textContent = formatDayTab(off);
+    btn.onclick = () => switchDay(off);
+    tabs.appendChild(btn);
+  }
+  // Scroll active tab into view
+  const activeTab = tabs.querySelector('.active');
+  if (activeTab) activeTab.scrollIntoView({block:'nearest',inline:'center'});
+}
+
+async function switchDay(offset) {
+  sfxClick();
+  currentDateOffset = offset;
+  const ds = todayPlusOffset(offset);
+
+  // Load quests for this day
+  if (!dayQuestCache[ds]) {
+    setSyncStatus('loading', 'Loading...');
+    try {
+      const data = await sbFetch(`quests?quest_date=eq.${ds}&order=start_time.asc`);
+      dayQuestCache[ds] = data || [];
+      setSyncStatus('ok', 'Synced ✦');
+    } catch(e) {
+      setSyncStatus('err', 'Load failed');
+    }
+  }
+
+  // Update main quests array for rendering
+  if (offset === 0) {
+    // Today — use main quests array
+    quests = dayQuestCache[ds];
+    await applyRecurringQuests(ds);
+  } else {
+    quests = dayQuestCache[ds] || [];
+  }
+
+  renderDayTabs();
+  renderQuests();
+  renderProgress();
+  renderCalendar();
+}
+
+function shiftDay(dir) {
+  const offsets = [-1, 0, 1, 2, 3];
+  const idx = offsets.indexOf(currentDateOffset);
+  const newIdx = Math.max(0, Math.min(offsets.length-1, idx + dir));
+  switchDay(offsets[newIdx]);
+}
+
+// ── Right-click context menu ────────────────
+let contextQuest = null;
+
+function showContextMenu(e, questId) {
+  e.preventDefault();
+  sfxClick();
+  contextQuest = questId;
+  
+  // Remove existing menu
+  const existing = document.getElementById('questContextMenu');
+  if (existing) existing.remove();
+
+  const menu = document.createElement('div');
+  menu.id = 'questContextMenu';
+  menu.style.cssText = `
+    position:fixed;z-index:5000;
+    background:rgba(255,255,255,0.98);
+    border:1px solid var(--panel-border);
+    border-radius:10px;padding:6px;
+    box-shadow:0 8px 24px rgba(42,82,152,0.15);
+    min-width:160px;
+    animation:slideUp .15s ease;
+    font-family:'Crimson Pro',serif;
+    font-size:15px;
+  `;
+  menu.style.left = Math.min(e.clientX, window.innerWidth - 180) + 'px';
+  menu.style.top = Math.min(e.clientY, window.innerHeight - 180) + 'px';
+
+  const items = [
+    { icon: '➡️', label: 'Move to Tomorrow', action: () => moveQuestToDay(questId, 1) },
+    { icon: '📅', label: 'Move to Next Week', action: () => moveQuestToDay(questId, 7) },
+    { icon: '✏️', label: 'Edit Quest', action: () => editQuest(questId) },
+    { icon: '🗑️', label: 'Delete Quest', action: () => deleteQuest(questId), danger: true },
+  ];
+
+  items.forEach(item => {
+    const btn = document.createElement('button');
+    btn.style.cssText = `
+      display:flex;align-items:center;gap:10px;width:100%;
+      padding:8px 10px;border:none;background:none;
+      cursor:pointer;border-radius:6px;text-align:left;
+      color:${item.danger ? '#c05050' : 'var(--text-dark)'};
+      transition:background .15s;font-size:14px;font-family:'Crimson Pro',serif;
+    `;
+    btn.innerHTML = `<span>${item.icon}</span><span>${item.label}</span>`;
+    btn.onmouseover = () => btn.style.background = 'rgba(74,127,212,0.08)';
+    btn.onmouseout = () => btn.style.background = 'none';
+    btn.onclick = () => { menu.remove(); item.action(); };
+    menu.appendChild(btn);
+  });
+
+  document.body.appendChild(menu);
+  setTimeout(() => document.addEventListener('click', () => menu.remove(), { once: true }), 10);
+}
+
+async function moveQuestToDay(id, daysAhead) {
+  const q = quests.find(x => x.id === id);
+  if (!q) return;
+  const newDate = todayPlusOffset(daysAhead);
+  try {
+    await sbFetch(`quests?id=eq.${id}`, 'PATCH', { quest_date: newDate });
+    quests = quests.filter(x => x.id !== id);
+    dayQuestCache = {}; // invalidate cache
+    sfxClick();
+    renderQuests();
+    renderProgress();
+    renderDayTabs();
+  } catch(e) { console.error(e); }
+}
+
+async function deleteQuest(id) {
+  try {
+    await sbFetch(`quests?id=eq.${id}`, 'DELETE');
+    quests = quests.filter(x => x.id !== id);
+    dayQuestCache = {};
+    sfxClick();
+    renderQuests();
+    renderProgress();
+    renderDayTabs();
+  } catch(e) { console.error(e); }
+}
+
+function editQuest(id) {
+  const q = quests.find(x => x.id === id);
+  if (!q) return;
+  openNewQuestModal(q.quest_date);
+  setTimeout(() => {
+    document.getElementById('nqName').value = q.name;
+    document.getElementById('nqName').dataset.editId = id;
+    document.getElementById('nqSize').value = q.size || 'quick';
+    if (q.start_time) document.getElementById('nqTime').value = q.start_time;
+    // Set category
+    const catSel = document.getElementById('nqCat');
+    const opts = Array.from(catSel.options).map(o => o.value);
+    if (opts.includes(q.category)) catSel.value = q.category;
+    setNqType(q.type || 'main');
+  }, 150);
+}
+
+// ── All Clear ──────────────────────────────
+let allClearShown = false;
+
+async function checkAllClear() {
+  if (currentDateOffset !== 0) return;
+  const tq = quests.filter(q => q.name !== '__XP_RECORD__');
+  if (tq.length === 0 || allClearShown) return;
+  const allDone = tq.every(q => q.status === 'done');
+  if (!allDone) { allClearShown = false; return; }
+  if (allClearShown) return;
+  allClearShown = true;
+
+  // Load tomorrow quests
+  const tomorrow = todayPlusOffset(1);
+  let tmrQuests = [];
+  try {
+    const data = await sbFetch(`quests?quest_date=eq.${tomorrow}&order=start_time.asc`);
+    tmrQuests = data || [];
+  } catch(e) {}
+
+  const tmrSection = document.getElementById('allClearTomorrow');
+  const tmrList = document.getElementById('allClearTomorrowList');
+
+  if (tmrQuests.length > 0) {
+    tmrSection.style.display = 'block';
+    tmrList.innerHTML = tmrQuests.slice(0,4).map(q =>
+      `<div class="all-clear-tomorrow-item">
+        <span style="font-size:10px;color:${q.type==='main'?'var(--gold)':'var(--blue-mid)'}">${q.type==='main'?'⚔':'◎'}</span>
+        <span>${q.name}</span>
+        ${q.start_time?`<span style="margin-left:auto;font-size:11px;color:var(--text-pale)">⌚${q.start_time}</span>`:''}
+      </div>`
+    ).join('');
+    if (tmrQuests.length > 4) {
+      tmrList.innerHTML += `<div style="font-size:12px;color:var(--text-pale);font-style:italic;padding:4px 0">+${tmrQuests.length-4} more quests</div>`;
+    }
+    document.getElementById('allClearSub').textContent = "Today's journey is complete. Ready for tomorrow?";
+  } else {
+    tmrSection.style.display = 'none';
+    document.getElementById('allClearSub').textContent = "Today's journey is complete.
+No quests tomorrow — rest well, hero.";
+  }
+
+  // Show overlay with star animation
+  const overlay = document.getElementById('allClearOverlay');
+  overlay.classList.add('show');
+  startAllClearStars();
+  sfxCleared();
+}
+
+function closeAllClear() {
+  document.getElementById('allClearOverlay').classList.remove('show');
+  document.getElementById('allClearOverlay').style.display = 'none';
+  sfxClick();
+}
+
+function goToTomorrow() {
+  closeAllClear();
+  switchDay(1);
+}
+
+function startAllClearStars() {
+  const canvas = document.getElementById('allClearStars');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const particles = Array.from({length:40}, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    size: 1 + Math.random() * 3,
+    speed: 0.2 + Math.random() * 0.5,
+    opacity: Math.random(),
+    dir: Math.random() * Math.PI * 2,
+    pulse: Math.random() * Math.PI * 2,
+  }));
+
+  let frame;
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => {
+      p.pulse += 0.03;
+      p.y -= p.speed * 0.5;
+      p.x += Math.sin(p.dir + p.pulse) * 0.3;
+      if (p.y < -10) p.y = canvas.height + 10;
+      const alpha = (0.3 + Math.sin(p.pulse) * 0.3) * p.opacity;
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.pulse);
+      ctx.fillStyle = Math.random() > 0.7 ? '#c49a3c' : '#7aaee8';
+      ctx.beginPath();
+      ctx.moveTo(0, -p.size);
+      ctx.lineTo(p.size*0.5, 0);
+      ctx.lineTo(0, p.size);
+      ctx.lineTo(-p.size*0.5, 0);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    });
+    if (document.getElementById('allClearOverlay').classList.contains('show')) {
+      frame = requestAnimationFrame(draw);
+    }
+  }
+  frame = requestAnimationFrame(draw);
+}
+
+// ── Pomodoro Timer ────────────────────────
+const POMO_MODES = {
+  focus: { label: 'Focus', minutes: 25, color: '#4a7fd4' },
+  short: { label: 'Short Break', minutes: 5, color: '#5a9a6a' },
+  long:  { label: 'Long Break', minutes: 15, color: '#c49a3c' },
+};
+
+let pomoMode = 'focus';
+let pomoSecondsLeft = 25 * 60;
+let pomoTotalSeconds = 25 * 60;
+let pomoRunning = false;
+let pomoTimer = null;
+let pomoSession = 0; // 0-3, resets after 4
+let pomoCompletedSessions = 0;
+let pomoLinkedQuest = null;
+
+function setPomoMode(mode, btn) {
+  if (pomoRunning) return;
+  pomoMode = mode;
+  pomoSecondsLeft = POMO_MODES[mode].minutes * 60;
+  pomoTotalSeconds = pomoSecondsLeft;
+  document.querySelectorAll('.pomo-mode-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('pomoTimeLabel').textContent = POMO_MODES[mode].label;
+  updatePomoDisplay();
+  drawPomoRing(1);
+  sfxClick();
+}
+
+function pomoToggle() {
+  if (pomoRunning) {
+    pomoRunning = false;
+    clearInterval(pomoTimer);
+    document.getElementById('pomoPlayBtn').textContent = '▶';
+    sfxClick();
+  } else {
+    pomoRunning = true;
+    document.getElementById('pomoPlayBtn').textContent = '⏸';
+    sfxClick();
+    pomoTimer = setInterval(() => {
+      pomoSecondsLeft--;
+      updatePomoDisplay();
+      drawPomoRing(pomoSecondsLeft / pomoTotalSeconds);
+      if (pomoSecondsLeft <= 0) {
+        pomoComplete();
+      }
+    }, 1000);
+  }
+}
+
+function pomoReset() {
+  pomoRunning = false;
+  clearInterval(pomoTimer);
+  pomoSecondsLeft = POMO_MODES[pomoMode].minutes * 60;
+  pomoTotalSeconds = pomoSecondsLeft;
+  document.getElementById('pomoPlayBtn').textContent = '▶';
+  updatePomoDisplay();
+  drawPomoRing(1);
+  sfxClick();
+}
+
+function pomoSkip() {
+  clearInterval(pomoTimer);
+  pomoRunning = false;
+  pomoComplete();
+}
+
+function pomoComplete() {
+  clearInterval(pomoTimer);
+  pomoRunning = false;
+  document.getElementById('pomoPlayBtn').textContent = '▶';
+  
+  if (pomoMode === 'focus') {
+    pomoCompletedSessions++;
+    pomoSession = (pomoSession + 1) % 4;
+    sfxQuestAccepted();
+    // Auto suggest break
+    if (pomoSession === 0) {
+      setPomoModeAuto('long');
+    } else {
+      setPomoModeAuto('short');
+    }
+  } else {
+    sfxClick();
+    setPomoModeAuto('focus');
+  }
+  updatePomoSessionDots();
+
+  // Browser notification
+  if (Notification.permission === 'granted') {
+    new Notification('The Growth Journey', {
+      body: pomoMode === 'focus' ? '⏰ Focus session done! Time for a break.' : '✦ Break over. Back to work!',
+      icon: '/favicon.ico',
+      silent: false,
+    });
+  }
+}
+
+function setPomoModeAuto(mode) {
+  pomoMode = mode;
+  pomoSecondsLeft = POMO_MODES[mode].minutes * 60;
+  pomoTotalSeconds = pomoSecondsLeft;
+  document.getElementById('pomoTimeLabel').textContent = POMO_MODES[mode].label;
+  document.querySelectorAll('.pomo-mode-btn').forEach((b,i) => {
+    b.classList.toggle('active', ['focus','short','long'][i] === mode);
+  });
+  updatePomoDisplay();
+  drawPomoRing(1);
+}
+
+function updatePomoDisplay() {
+  const m = Math.floor(pomoSecondsLeft / 60);
+  const s = pomoSecondsLeft % 60;
+  document.getElementById('pomoTimeText').textContent =
+    m.toString().padStart(2,'0') + ':' + s.toString().padStart(2,'0');
+}
+
+function updatePomoSessionDots() {
+  const dots = document.getElementById('pomoSessionDots');
+  dots.innerHTML = Array.from({length:4}, (_,i) => {
+    const cls = i < pomoSession ? 'done' : i === pomoSession && pomoRunning ? 'current' : '';
+    return `<div class="pomo-dot ${cls}"></div>`;
+  }).join('');
+}
+
+function drawPomoRing(progress) {
+  const canvas = document.getElementById('pomoCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const cx = 70, cy = 70, r = 58;
+  ctx.clearRect(0,0,140,140);
+
+  // Background ring
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI*2);
+  ctx.strokeStyle = 'rgba(180,210,240,0.3)';
+  ctx.lineWidth = 6;
+  ctx.stroke();
+
+  // Progress ring
+  if (progress > 0) {
+    const color = POMO_MODES[pomoMode].color;
+    const start = -Math.PI/2;
+    const end = start + (Math.PI*2 * progress);
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, start, end);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 6;
+    ctx.lineCap = 'round';
+    ctx.shadowColor = color;
+    ctx.shadowBlur = 8;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // Moving dot at tip
+    const dotX = cx + r * Math.cos(end);
+    const dotY = cy + r * Math.sin(end);
+    ctx.beginPath();
+    ctx.arc(dotX, dotY, 5, 0, Math.PI*2);
+    ctx.fillStyle = color;
+    ctx.shadowColor = color;
+    ctx.shadowBlur = 10;
+    ctx.fill();
+    ctx.shadowBlur = 0;
+  }
+}
+
+function linkPomoQuest() {
+  sfxClick();
+  const todayQ = quests.filter(q => q.status !== 'done' && q.name !== '__XP_RECORD__');
+  if (todayQ.length === 0) return;
+
+  // Simple picker — cycle through quests
+  if (!pomoLinkedQuest) {
+    pomoLinkedQuest = todayQ[0];
+  } else {
+    const idx = todayQ.findIndex(q => q.id === pomoLinkedQuest.id);
+    pomoLinkedQuest = todayQ[(idx + 1) % todayQ.length];
+  }
+
+  const nameEl = document.getElementById('pomoQuestName');
+  const link = document.getElementById('pomoQuestLink');
+  nameEl.textContent = pomoLinkedQuest.name;
+  link.classList.add('linked');
+}
+
+function initPomo() {
+  drawPomoRing(1);
+  updatePomoSessionDots();
+  updatePomoDisplay();
+  // Request notification permission
+  if (Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+}
+
 // ── Init ───────────────────────────────────
 async function init() {
   setSyncStatus('loading', 'Loading quests...');
@@ -897,8 +1450,10 @@ async function init() {
     const xpData = await sbFetch('player_xp?id=eq.1');
     if (xpData && xpData.length) playerXp = xpData[0];
     setSyncStatus('ok', 'Synced ✦');
+    dayQuestCache[todayStr()] = quests;
     render();
     renderCalendar();
+    await initDaySlider();
   } catch(e) {
     setSyncStatus('err', 'Connection failed: ' + e.message);
     console.error(e);
@@ -1058,6 +1613,7 @@ function makeItem(q){
       <span class="qqxp">${q.type==='main'?'+100':'+30'} XP</span>
     </div>`;
   div.addEventListener('click',()=>cycleStatus(q.id,div));
+  div.addEventListener('contextmenu',e=>showContextMenu(e,q.id));
   return div;
 }
 
@@ -1072,13 +1628,15 @@ function fmtDL(dl){
 function isSoon(dl){const d=new Date(dl)-new Date();return d>0&&d<3600000;}
 
 function renderProgress(){
-  const total=quests.length,done=quests.filter(q=>q.status==='done').length;
+  const tq=quests.filter(q=>q.name!=='__XP_RECORD__');
+  const total=tq.length,done=tq.filter(q=>q.status==='done').length;
   const pct=total?Math.round(done/total*100):0;
   document.getElementById('pctDisplay').textContent=pct+'%';
   document.getElementById('dayFill').style.width=pct+'%';
   const msgs=['The day has just begun...','Taking the first steps...','Making steady progress...','Over halfway there!','Almost complete — push through!','Like Himmel would say — today was a good day.'];
   document.getElementById('pctMsg').textContent=msgs[pct===0?0:pct<25?1:pct<50?2:pct<75?3:pct<100?4:5];
   document.getElementById('allDone').className='all-done'+(pct===100&&total>0?' show':'');
+  if(pct===100&&total>0) setTimeout(checkAllClear, 800);
 }
 
 function renderXP(){
@@ -1274,7 +1832,7 @@ document.addEventListener('keydown',e=>{
 setInterval(updateDate,1000);
 setInterval(()=>renderCalendar(),120000);
 
-initMotes();updateDate();updateEditUI();setDailyQuote();init();
+initMotes();updateDate();updateEditUI();setDailyQuote();init();initPomo();
 </script>
 </body>
 </html>
