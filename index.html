@@ -212,6 +212,8 @@ body{min-height:100vh;font-family:'Crimson Pro',Georgia,serif;font-size:17px;col
 .xp-popup{position:fixed;font-family:'Cinzel',serif;font-size:12px;font-weight:700;color:var(--gold);pointer-events:none;z-index:1001;animation:xpFloat 1.6s ease-out forwards}
 @keyframes xpFloat{0%{transform:translateY(0);opacity:1}100%{transform:translateY(-70px);opacity:0}}
 @keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes slideUpFull{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
+.pomo-full-panel{pointer-events:all;width:100%;max-width:480px;background:rgba(255,255,255,0.97);border-radius:24px 24px 0 0;box-shadow:0 -8px 40px rgba(42,82,152,0.15);backdrop-filter:blur(20px);padding:28px 28px 40px;animation:slideUpFull .4s cubic-bezier(.34,1.2,.64,1)}
 ::-webkit-scrollbar{width:5px}
 ::-webkit-scrollbar-thumb{background:var(--blue-pale);border-radius:3px}
 </style>
@@ -452,9 +454,7 @@ body{min-height:100vh;font-family:'Crimson Pro',Georgia,serif;font-size:17px;col
     </div>
 
     <!-- Full modal -->
-    <div id="pomoFull" style="pointer-events:all;width:100%;max-width:480px;background:rgba(255,255,255,0.97);border-radius:24px 24px 0 0;box-shadow:0 -8px 40px rgba(42,82,152,0.15);backdrop-filter:blur(20px);padding:28px 28px 40px;animation:slideUpFull .4s cubic-bezier(.34,1.2,.64,1)">
-      @keyframes slideUpFull{from{transform:translateY(100%)}to{transform:translateY(0)}}
-      
+    <div id="pomoFull" class="pomo-full-panel">
       <!-- Handle bar -->
       <div style="width:36px;height:4px;background:var(--blue-pale);border-radius:2px;margin:0 auto 20px;cursor:pointer" onclick="minimizePomo()"></div>
       
