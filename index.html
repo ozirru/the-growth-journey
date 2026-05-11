@@ -383,7 +383,7 @@ body{min-height:100vh;font-family:'Crimson Pro',Georgia,serif;font-size:17px;col
         <div id="nqDaysWrap" style="display:none;margin-top:10px">
           <div style="font-size:12px;color:var(--text-light);margin-bottom:6px;font-style:italic">Repeat on:</div>
           <div style="display:flex;gap:6px;flex-wrap:wrap">
-            <button onclick="toggleDay(0)" id="nqDay0" style="width:38px;height:38px;border-radius:50%;border:2px solid var(--blue-pale);background:white;color:var(--blue-mid);font-family:'Cinzel',serif;font-size:8px;font-weight:700;cursor:pointer;transition:all .3s;flex-shrink:0;position:relative;overflow:hidden">Mo</button><button onclick="toggleDay(1)" id="nqDay1" style="width:38px;height:38px;border-radius:50%;border:2px solid var(--blue-pale);background:white;color:var(--blue-mid);font-family:'Cinzel',serif;font-size:8px;font-weight:700;cursor:pointer;transition:all .3s;flex-shrink:0;position:relative;overflow:hidden">Tu</button><button onclick="toggleDay(2)" id="nqDay2" style="width:38px;height:38px;border-radius:50%;border:2px solid var(--blue-pale);background:white;color:var(--blue-mid);font-family:'Cinzel',serif;font-size:8px;font-weight:700;cursor:pointer;transition:all .3s;flex-shrink:0;position:relative;overflow:hidden">We</button><button onclick="toggleDay(3)" id="nqDay3" style="width:38px;height:38px;border-radius:50%;border:2px solid var(--blue-pale);background:white;color:var(--blue-mid);font-family:'Cinzel',serif;font-size:8px;font-weight:700;cursor:pointer;transition:all .3s;flex-shrink:0;position:relative;overflow:hidden">Th</button><button onclick="toggleDay(4)" id="nqDay4" style="width:38px;height:38px;border-radius:50%;border:2px solid var(--blue-pale);background:white;color:var(--blue-mid);font-family:'Cinzel',serif;font-size:8px;font-weight:700;cursor:pointer;transition:all .3s;flex-shrink:0;position:relative;overflow:hidden">Fr</button><button onclick="toggleDay(5)" id="nqDay5" style="width:38px;height:38px;border-radius:50%;border:2px solid var(--blue-pale);background:white;color:var(--blue-mid);font-family:'Cinzel',serif;font-size:8px;font-weight:700;cursor:pointer;transition:all .3s;flex-shrink:0;position:relative;overflow:hidden">Sa</button><button onclick="toggleDay(6)" id="nqDay6" style="width:38px;height:38px;border-radius:50%;border:2px solid var(--blue-pale);background:white;color:var(--blue-mid);font-family:'Cinzel',serif;font-size:8px;font-weight:700;cursor:pointer;transition:all .3s;flex-shrink:0;position:relative;overflow:hidden">Su</button>
+            <div id="nqDayWrap0" style="position:relative;width:38px;height:38px;flex-shrink:0"><button onclick="toggleDay(0)" id="nqDay0" style="width:38px;height:38px;border-radius:50%;border:2px solid var(--blue-pale);background:white;color:var(--blue-mid);font-family:'Cinzel',serif;font-size:8px;font-weight:700;cursor:pointer;transition:all .3s;position:relative;z-index:1">Mo</button></div><div id="nqDayWrap1" style="position:relative;width:38px;height:38px;flex-shrink:0"><button onclick="toggleDay(1)" id="nqDay1" style="width:38px;height:38px;border-radius:50%;border:2px solid var(--blue-pale);background:white;color:var(--blue-mid);font-family:'Cinzel',serif;font-size:8px;font-weight:700;cursor:pointer;transition:all .3s;position:relative;z-index:1">Tu</button></div><div id="nqDayWrap2" style="position:relative;width:38px;height:38px;flex-shrink:0"><button onclick="toggleDay(2)" id="nqDay2" style="width:38px;height:38px;border-radius:50%;border:2px solid var(--blue-pale);background:white;color:var(--blue-mid);font-family:'Cinzel',serif;font-size:8px;font-weight:700;cursor:pointer;transition:all .3s;position:relative;z-index:1">We</button></div><div id="nqDayWrap3" style="position:relative;width:38px;height:38px;flex-shrink:0"><button onclick="toggleDay(3)" id="nqDay3" style="width:38px;height:38px;border-radius:50%;border:2px solid var(--blue-pale);background:white;color:var(--blue-mid);font-family:'Cinzel',serif;font-size:8px;font-weight:700;cursor:pointer;transition:all .3s;position:relative;z-index:1">Th</button></div><div id="nqDayWrap4" style="position:relative;width:38px;height:38px;flex-shrink:0"><button onclick="toggleDay(4)" id="nqDay4" style="width:38px;height:38px;border-radius:50%;border:2px solid var(--blue-pale);background:white;color:var(--blue-mid);font-family:'Cinzel',serif;font-size:8px;font-weight:700;cursor:pointer;transition:all .3s;position:relative;z-index:1">Fr</button></div><div id="nqDayWrap5" style="position:relative;width:38px;height:38px;flex-shrink:0"><button onclick="toggleDay(5)" id="nqDay5" style="width:38px;height:38px;border-radius:50%;border:2px solid var(--blue-pale);background:white;color:var(--blue-mid);font-family:'Cinzel',serif;font-size:8px;font-weight:700;cursor:pointer;transition:all .3s;position:relative;z-index:1">Sa</button></div><div id="nqDayWrap6" style="position:relative;width:38px;height:38px;flex-shrink:0"><button onclick="toggleDay(6)" id="nqDay6" style="width:38px;height:38px;border-radius:50%;border:2px solid var(--blue-pale);background:white;color:var(--blue-mid);font-family:'Cinzel',serif;font-size:8px;font-weight:700;cursor:pointer;transition:all .3s;position:relative;z-index:1">Su</button></div>
           </div>
         </div>
       </div>
@@ -644,12 +644,91 @@ function handleNqFreq() {
 
 function toggleDay(i) {
   const btn = document.getElementById('nqDay' + i);
+  const wrap = document.getElementById('nqDayWrap' + i);
+  const days_labels = ['Mo','Tu','We','Th','Fr','Sa','Su'];
+
   if (selectedDays.includes(i)) {
+    // Deselect
     selectedDays = selectedDays.filter(d => d !== i);
-    btn.classList.remove('nq-day-active');
+    btn.style.background = 'white';
+    btn.style.color = 'var(--blue-mid)';
+    btn.style.borderColor = 'var(--blue-pale)';
+    btn.style.boxShadow = 'none';
+    btn.textContent = days_labels[i];
+    // Remove ring and cancel animation
+    const ring = wrap.querySelector('.day-ring');
+    if (ring) {
+      if (ring._raf) cancelAnimationFrame(ring._raf);
+      ring.remove();
+    }
   } else {
+    // Select
     selectedDays.push(i);
-    btn.classList.add('nq-day-active');
+    btn.style.background = 'var(--blue-mid)';
+    btn.style.color = 'white';
+    btn.style.borderColor = 'var(--blue-mid)';
+    btn.style.boxShadow = '0 2px 12px rgba(74,127,212,0.5)';
+    btn.textContent = days_labels[i];
+    // Add gold spinning ring outside button
+    const ring = document.createElement('div');
+    ring.className = 'day-ring';
+    // Use canvas for anime-style orbiting diamond
+    ring.style.cssText = 'position:absolute;inset:-8px;pointer-events:none;z-index:2;';
+    const canvas = document.createElement('canvas');
+    const size = 54;
+    canvas.width = size;
+    canvas.height = size;
+    canvas.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%';
+    ring.appendChild(canvas);
+    const ctx = canvas.getContext('2d');
+    const cx = size/2, cy = size/2, r = size/2 - 4;
+    let angle = 0;
+    ring._animFrame = function() {
+      ctx.clearRect(0,0,size,size);
+      // Orbit trail
+      for(let t=0;t<8;t++){
+        const a = (angle - t*15) * Math.PI/180;
+        const x = cx + r * Math.cos(a);
+        const y = cy + r * Math.sin(a);
+        const alpha = (8-t)/8 * 0.8;
+        const dsize = (8-t)/8 * 4;
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.translate(x, y);
+        ctx.rotate(a + Math.PI/4);
+        ctx.fillStyle = '#c49a3c';
+        ctx.beginPath();
+        ctx.moveTo(0, -dsize);
+        ctx.lineTo(dsize, 0);
+        ctx.lineTo(0, dsize);
+        ctx.lineTo(-dsize, 0);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
+      // Main diamond
+      const ma = angle * Math.PI/180;
+      const mx = cx + r * Math.cos(ma);
+      const my = cy + r * Math.sin(ma);
+      ctx.save();
+      ctx.translate(mx, my);
+      ctx.rotate(angle * Math.PI/180 + Math.PI/4);
+      ctx.fillStyle = '#e8c97a';
+      ctx.shadowColor = '#c49a3c';
+      ctx.shadowBlur = 6;
+      ctx.beginPath();
+      ctx.moveTo(0, -5);
+      ctx.lineTo(5, 0);
+      ctx.lineTo(0, 5);
+      ctx.lineTo(-5, 0);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+      angle = (angle + 4) % 360;
+      ring._raf = requestAnimationFrame(ring._animFrame);
+    };
+    ring._raf = requestAnimationFrame(ring._animFrame);
+    wrap.appendChild(ring);
   }
   sfxClick();
 }
