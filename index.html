@@ -425,8 +425,14 @@ function ytPause() {
 
       <!-- Time & Deadline -->
       <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
-        <input class="qi" id="nqTime" type="time" style="width:110px;flex-shrink:0"/>
-        <input class="qi" id="nqDl" type="datetime-local" style="flex:1;min-width:140px"/>
+        <div style="display:flex;flex-direction:column;gap:3px;flex:1">
+          <span style="font-size:10px;color:var(--text-pale);font-family:'Cinzel',serif;letter-spacing:1px">FROM</span>
+          <input class="qi" id="nqTime" type="datetime-local" style="width:100%"/>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:3px;flex:1">
+          <span style="font-size:10px;color:var(--text-pale);font-family:'Cinzel',serif;letter-spacing:1px">UNTIL</span>
+          <input class="qi" id="nqDl" type="datetime-local" style="width:100%"/>
+        </div>
       </div>
 
       <!-- Recurring -->
