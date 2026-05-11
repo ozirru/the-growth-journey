@@ -224,16 +224,18 @@ var ytReady = false;
 
 function onYouTubeIframeAPIReady() {
   ytPlayer = new YT.Player('pomoYT', {
-    height: '80',
-    width: '100%',
+    height: '1',
+    width: '1',
     videoId: 'u3EBlmzb9ds',
     playerVars: {
       autoplay: 0,
-      controls: 1,
+      controls: 0,
       rel: 0,
       modestbranding: 1,
       loop: 1,
-      playlist: 'u3EBlmzb9ds'
+      playlist: 'u3EBlmzb9ds',
+      origin: window.location.origin,
+      enablejsapi: 1
     },
     events: {
       onReady: function() { ytReady = true; }
@@ -1084,11 +1086,22 @@ async function renderDayTabs() {
       doneCount = dayQuestCache[ds].filter(q => q.status === 'done').length;
     } catch(e) {}
 
+      const isActive = off === currentDateOffset;
+    const hasQuests = count > 0 && doneCount < count;
+    const allDone = count > 0 && doneCount === count;
     const btn = document.createElement('button');
-    btn.className = 'day-tab' + (off === currentDateOffset ? ' active' : '') +
-      (count > 0 && doneCount < count ? ' has-quests' : '') +
-      (count > 0 && doneCount === count ? ' all-done' : '');
-    btn.textContent = formatDayTab(off);
+    btn.style.cssText = `
+      flex-shrink:0;padding:5px 14px;border-radius:20px;cursor:pointer;
+      font-family:'Cinzel',serif;font-size:9px;font-weight:600;letter-spacing:1px;
+      white-space:nowrap;border:none;transition:all .2s;
+      background:${isActive ? 'linear-gradient(135deg,var(--blue-mid),var(--blue-deep))' : 'transparent'};
+      color:${isActive ? 'white' : 'var(--text-light)'};
+      box-shadow:${isActive ? '0 2px 10px rgba(42,82,152,0.25)' : 'none'};
+    `;
+    const dot = hasQuests ? ' ●' : allDone ? ' ✓' : '';
+    btn.textContent = formatDayTab(off) + dot;
+    if (hasQuests) btn.style.color = isActive ? 'white' : 'var(--gold)';
+    if (allDone && !isActive) btn.style.color = 'var(--done-color)';
     btn.onclick = () => switchDay(off);
     tabs.appendChild(btn);
   }
