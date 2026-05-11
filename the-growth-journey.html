@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>The Growth Journey</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold:#c49a3c;--gold-light:#e8c97a;--gold-glow:rgba(196,154,60,0.25);
+  --blue-deep:#2a5298;--blue-mid:#4a7fd4;--blue-light:#7aaee8;--blue-pale:#b8d4f0;
+  --text-dark:#1a2744;--text-light:#5a7aaa;--text-pale:#8aaad0;
+  --main-quest:#c49a3c;--side-quest:#4a7fd4;--done-color:#5a9a6a;
+  --panel-bg:rgba(255,255,255,0.78);--panel-border:rgba(180,210,240,0.6);
+  --shadow:0 4px 24px rgba(42,82,152,0.08),0 1px 4px rgba(42,82,152,0.05);
+  --input-bg:rgba(255,255,255,0.97);--radius:14px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{min-height:100vh;font-family:'Crimson Pro',Georgia,serif;font-size:17px;color:var(--text-dark);overflow-x:hidden;background:#e8f4ff}
+.sky{position:fixed;inset:0;z-index:0;background:linear-gradient(175deg,#a8c8f0 0%,#c0d8f5 18%,#d8ecff 38%,#e8f4ff 55%,#f4f9ff 72%,#fff 100%)}
+.sky::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 40% at 70% 10%,rgba(255,255,255,0.6) 0%,transparent 70%)}
+.motes{position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden}
+.mote{position:absolute;border-radius:50%;background:rgba(255,255,255,0.9);box-shadow:0 0 6px rgba(196,154,60,0.3);animation:moteFloat var(--dur,8s) ease-in-out infinite;opacity:0}
+@keyframes moteFloat{0%{transform:translateY(0) translateX(0);opacity:0}15%{opacity:var(--op,.6)}85%{opacity:var(--op,.6)}100%{transform:translateY(var(--ty,-120px)) translateX(var(--tx,20px));opacity:0}}
+.container{position:relative;z-index:2;max-width:820px;margin:0 auto;padding:24px 16px 80px}
+
+#passwordGate{position:fixed;inset:0;z-index:9000;display:none;align-items:center;justify-content:center;background:rgba(42,82,152,0.15);backdrop-filter:blur(8px)}
+.gate-box{background:rgba(255,255,255,0.98);border:1px solid rgba(196,154,60,0.3);border-radius:20px;padding:36px 40px;text-align:center;box-shadow:0 8px 40px rgba(42,82,152,0.18);max-width:340px;width:90%;animation:slideUp .3s cubic-bezier(.34,1.56,.64,1)}
+.gate-ornament{color:var(--gold);font-size:12px;letter-spacing:4px;margin-bottom:12px}
+.gate-title{font-family:'Cinzel',serif;font-size:18px;font-weight:700;background:linear-gradient(135deg,var(--blue-deep),var(--blue-mid),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px}
+.gate-sub{font-size:13px;color:var(--text-light);font-style:italic;margin-bottom:20px}
+.gate-input{width:100%;background:var(--input-bg);border:1px solid var(--blue-pale);border-radius:10px;color:var(--text-dark);font-family:'Crimson Pro',serif;font-size:16px;padding:11px 16px;outline:none;text-align:center;letter-spacing:3px;transition:all .2s;margin-bottom:10px}
+.gate-input:focus{border-color:var(--blue-light);box-shadow:0 0 0 3px rgba(122,174,232,0.15)}
+.gate-btn{background:linear-gradient(135deg,var(--blue-mid),var(--blue-deep));color:white;border:none;border-radius:10px;font-family:'Cinzel',serif;font-size:10px;font-weight:600;letter-spacing:2px;padding:11px;cursor:pointer;width:100%;transition:all .2s;box-shadow:0 3px 12px rgba(42,82,152,0.25)}
+.gate-error{font-size:12px;color:#c05050;margin-top:6px;min-height:16px;font-style:italic}
+.gate-cancel{background:none;border:none;color:var(--text-pale);font-family:'Crimson Pro',serif;font-size:13px;cursor:pointer;margin-top:10px;font-style:italic;display:block;width:100%;padding:4px}
+
+.header{text-align:center;margin-bottom:24px;position:relative;padding-top:4px}
+.header-ornament{font-size:10px;letter-spacing:6px;color:var(--gold);text-transform:uppercase;margin-bottom:6px;opacity:.8}
+.logo{font-family:'Cinzel',serif;font-size:22px;font-weight:700;letter-spacing:2px;background:linear-gradient(135deg,var(--blue-deep) 0%,var(--blue-mid) 50%,var(--gold) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px}
+.logo-sub{font-size:12px;color:var(--text-light);letter-spacing:3px;text-transform:uppercase;font-style:italic}
+.header-divider{display:flex;align-items:center;gap:10px;margin:10px auto 0;max-width:280px}
+.divider-line{flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--blue-pale),transparent)}
+.divider-gem{width:5px;height:5px;background:var(--gold);transform:rotate(45deg);box-shadow:0 0 6px var(--gold-glow)}
+.date-display{position:absolute;right:0;top:4px;font-size:12px;color:var(--text-light);text-align:right;line-height:1.6}
+@media(max-width:480px){.date-display{position:static;text-align:center;margin-top:8px}}
+.edit-lock{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--text-pale);cursor:pointer;padding:4px 12px;border-radius:20px;border:1px solid var(--panel-border);background:rgba(255,255,255,0.5);transition:all .2s;margin-top:8px}
+.edit-lock.unlocked{color:var(--done-color);border-color:rgba(90,154,106,0.3)}
+
+.sync-bar{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px;font-size:12px;color:var(--text-pale)}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:var(--blue-pale);flex-shrink:0}
+.sync-dot.ok{background:var(--done-color);box-shadow:0 0 6px rgba(90,154,106,0.4)}
+.sync-dot.err{background:#e07070}
+.sync-dot.loading{background:var(--gold);animation:pulse .8s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+.panel{background:var(--panel-bg);border:1px solid var(--panel-border);border-radius:var(--radius);box-shadow:var(--shadow);backdrop-filter:blur(12px);padding:18px;margin-bottom:14px}
+.player-card{display:flex;gap:16px;align-items:center;background:linear-gradient(135deg,rgba(255,255,255,0.9),rgba(220,236,255,0.75));border-color:rgba(196,154,60,0.2)}
+.avatar-wrap{flex-shrink:0;width:64px;height:64px;border-radius:50%;overflow:hidden;box-shadow:0 4px 16px rgba(74,127,212,0.3),0 0 0 3px rgba(196,154,60,0.2);position:relative}
+.avatar-img{width:100%;height:100%;object-fit:cover;display:block}
+.avatar-placeholder{width:100%;height:100%;background:linear-gradient(135deg,var(--blue-mid),var(--blue-deep));display:none;align-items:center;justify-content:center;font-size:24px}
+.avatar-ring{position:absolute;inset:-4px;border-radius:50%;border:1.5px solid rgba(196,154,60,0.35);animation:rotateRing 8s linear infinite;pointer-events:none}
+@keyframes rotateRing{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.avatar-ring::before{content:'';position:absolute;top:2px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--gold);box-shadow:0 0 6px var(--gold)}
+.player-info{flex:1;min-width:0}
+.player-name{font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:var(--text-dark);letter-spacing:2px;margin-bottom:2px}
+.player-class{font-size:12px;color:var(--text-light);font-style:italic;margin-bottom:10px}
+.level-row{display:flex;align-items:center;gap:10px;margin-bottom:5px}
+.level-badge{font-family:'Cinzel',serif;font-size:8px;font-weight:700;background:linear-gradient(135deg,var(--gold),var(--gold-light));color:#1a2000;padding:3px 9px;border-radius:20px;letter-spacing:1px;white-space:nowrap;box-shadow:0 2px 8px var(--gold-glow);flex-shrink:0}
+.xp-bar-wrap{flex:1;min-width:0}
+.xp-label{display:flex;justify-content:space-between;font-size:11px;color:var(--text-light);margin-bottom:3px}
+.xp-bar{height:7px;background:rgba(180,210,240,0.4);border-radius:20px;overflow:hidden;border:1px solid rgba(180,210,240,0.5)}
+.xp-fill{height:100%;background:linear-gradient(90deg,var(--blue-mid),var(--gold-light));border-radius:20px;transition:width 1s cubic-bezier(.34,1.56,.64,1)}
+.player-stats{font-size:12px;color:var(--text-light)}
+.player-stats span{color:var(--blue-mid);font-weight:600}
+.player-stats .streak{color:var(--gold)}
+
+.section-label{font-family:'Cinzel',serif;font-size:8px;font-weight:600;letter-spacing:3px;color:var(--text-light);text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.section-label::before{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--blue-pale))}
+.section-label::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--blue-pale),transparent)}
+
+.progress-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:10px}
+.progress-pct{font-family:'Cinzel',serif;font-size:30px;font-weight:700;color:var(--blue-deep);line-height:1}
+.progress-msg{font-size:13px;color:var(--text-light);font-style:italic;text-align:right;line-height:1.4;max-width:60%}
+.day-bar{height:11px;background:rgba(180,210,240,0.3);border-radius:20px;overflow:hidden;border:1px solid rgba(180,210,240,0.5)}
+.day-fill{height:100%;border-radius:20px;background:linear-gradient(90deg,var(--blue-light),var(--blue-mid),var(--gold-light));background-size:200% 100%;animation:shimmer 4s linear infinite;transition:width 1.2s cubic-bezier(.34,1.56,.64,1)}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+.all-done{display:none;text-align:center;background:linear-gradient(135deg,rgba(90,154,106,0.07),rgba(74,127,212,0.05));border:1px solid rgba(90,154,106,0.22);border-radius:var(--radius);padding:14px;margin-bottom:14px}
+.all-done.show{display:block;animation:fadeUp .6s ease}
+@keyframes fadeUp{from{transform:translateY(8px);opacity:0}to{transform:translateY(0);opacity:1}}
+.all-done-title{font-family:'Cinzel',serif;font-size:11px;color:var(--done-color);letter-spacing:2px;margin-bottom:3px}
+.all-done-sub{font-size:13px;color:var(--text-light);font-style:italic}
+
+.quests-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+@media(max-width:560px){.quests-grid{grid-template-columns:1fr}}
+.quest-panel{padding:16px;margin-bottom:0}
+.quest-panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.quest-panel-title{font-family:'Cinzel',serif;font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase}
+.quest-panel.main .quest-panel-title{color:var(--main-quest)}
+.quest-panel.side .quest-panel-title{color:var(--side-quest)}
+.xp-pill{font-size:10px;padding:2px 9px;border-radius:20px;font-weight:600}
+.quest-panel.main .xp-pill{background:rgba(196,154,60,0.1);color:var(--main-quest);border:1px solid rgba(196,154,60,0.18)}
+.quest-panel.side .xp-pill{background:rgba(74,127,212,0.08);color:var(--side-quest);border:1px solid rgba(74,127,212,0.14)}
+
+.quest-item{background:rgba(255,255,255,0.72);border:1px solid rgba(180,210,240,0.5);border-radius:10px;padding:10px 12px;margin-bottom:7px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;user-select:none}
+.quest-item::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--blue-pale);border-radius:3px 0 0 3px}
+.quest-item:active{transform:scale(.98)}
+.quest-item.in-progress::before{background:var(--gold)}
+.quest-item.in-progress{background:rgba(255,251,237,0.85);border-color:rgba(196,154,60,0.25)}
+.quest-item.done{opacity:.46;background:rgba(240,248,240,0.7);border-color:rgba(90,154,106,0.2)}
+.quest-item.done::before{background:var(--done-color)}
+.quest-top{display:flex;align-items:flex-start;gap:8px;margin-bottom:4px}
+.qcheck{width:16px;height:16px;border-radius:50%;border:2px solid var(--blue-pale);flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;font-size:9px;background:white;transition:all .2s}
+.quest-item.in-progress .qcheck{border-color:var(--gold)}
+.quest-item.done .qcheck{background:var(--done-color);border-color:var(--done-color);color:white}
+.qname{font-size:14px;line-height:1.4;color:var(--text-dark);flex:1}
+.quest-item.done .qname{text-decoration:line-through;color:var(--text-pale)}
+.cleared-badge{display:none;font-size:8px;color:var(--done-color);font-style:italic;font-family:'Cinzel',serif;letter-spacing:1px;flex-shrink:0;margin-top:2px}
+.quest-item.done .cleared-badge{display:block}
+.qmeta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding-left:24px}
+.qtime{font-size:11px;color:var(--text-pale)}
+.qdeadline{font-size:11px;color:#d4844a}
+.qdeadline.soon{animation:blink 1s step-end infinite;color:#c0503a}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.qcat{font-size:10px;padding:1px 6px;border-radius:20px;background:rgba(74,127,212,0.07);color:var(--blue-mid);border:1px solid rgba(74,127,212,0.12)}
+.qqxp{font-size:11px;color:var(--gold);margin-left:auto;font-style:italic;font-weight:600}
+.empty-quest{color:var(--text-pale);font-size:13px;text-align:center;padding:16px 0;font-style:italic}
+
+.add-quest-panel{padding:16px}
+.add-quest-form{display:flex;flex-direction:column;gap:10px}
+.add-form-row{display:flex;gap:8px;flex-wrap:wrap}
+.qi,.qs{background:var(--input-bg);border:1px solid rgba(180,210,240,0.6);border-radius:8px;color:var(--text-dark);font-family:'Crimson Pro',serif;font-size:15px;padding:8px 11px;outline:none;transition:all .2s;-webkit-appearance:none}
+.qi:focus,.qs:focus{border-color:var(--blue-light);box-shadow:0 0 0 3px rgba(122,174,232,0.12)}
+.qi.name{flex:1;min-width:0;width:100%}
+.qi.time-inp{width:110px;flex-shrink:0}
+.qi.dl-inp{flex:1;min-width:140px}
+.qi.others-inp{flex:1;min-width:100px}
+.qs option{background:white;color:var(--text-dark)}
+.others-wrap{display:none;flex:1}
+.others-wrap.show{display:flex}
+.add-btn-row{display:flex;gap:8px}
+.add-main-btn,.add-side-btn{flex:1;border:none;border-radius:8px;font-family:'Cinzel',serif;font-size:9px;font-weight:600;letter-spacing:1px;padding:10px 8px;cursor:pointer;transition:all .2s}
+.add-main-btn{background:linear-gradient(135deg,var(--gold),#a07828);color:#fff;box-shadow:0 3px 10px var(--gold-glow)}
+.add-side-btn{background:linear-gradient(135deg,var(--blue-mid),var(--blue-deep));color:#fff;box-shadow:0 3px 10px rgba(42,82,152,0.2)}
+
+#addFab{position:fixed;bottom:24px;right:20px;width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,var(--blue-mid),var(--blue-deep));border:none;color:white;font-size:22px;cursor:pointer;box-shadow:0 4px 18px rgba(42,82,152,0.35);display:flex;align-items:center;justify-content:center;z-index:500;transition:all .2s}
+#addFab:active{transform:scale(.95)}
+@media(min-width:821px){#addFab{display:none}}
+
+.cal-wrap{margin-bottom:14px}
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+.cal-nav{display:flex;align-items:center;gap:8px}
+.cal-nav-btn{background:rgba(255,255,255,0.7);border:1px solid var(--panel-border);border-radius:8px;color:var(--text-light);padding:5px 12px;cursor:pointer;font-family:'Crimson Pro',serif;font-size:15px;transition:all .2s;line-height:1}
+.cal-title{font-family:'Cinzel',serif;font-size:11px;font-weight:600;color:var(--text-dark);letter-spacing:1px;min-width:160px;text-align:center}
+.cal-controls{display:flex;gap:6px;align-items:center}
+.cal-today-btn{background:rgba(255,255,255,0.7);border:1px solid var(--panel-border);border-radius:8px;color:var(--text-light);padding:5px 10px;cursor:pointer;font-family:'Cinzel',serif;font-size:9px;letter-spacing:1px;transition:all .2s}
+.cal-view-toggle{display:flex;gap:2px;background:rgba(255,255,255,0.5);border:1px solid var(--panel-border);border-radius:8px;padding:3px}
+.cal-view-btn{padding:3px 12px;border-radius:5px;cursor:pointer;font-family:'Cinzel',serif;font-size:8px;font-weight:600;letter-spacing:1px;color:var(--text-light);transition:all .2s;border:none;background:transparent}
+.cal-view-btn.active{background:white;color:var(--blue-deep);box-shadow:0 1px 4px rgba(42,82,152,0.1)}
+.cal-day-headers{display:grid;grid-template-columns:44px repeat(7,1fr);border-bottom:1px solid var(--panel-border)}
+.cal-day-header{padding:6px 2px;text-align:center;font-family:'Cinzel',serif;font-size:7px;font-weight:600;letter-spacing:1px;color:var(--text-pale);text-transform:uppercase}
+.cal-day-header.today-h{color:var(--blue-deep)}
+.cal-day-header.wkend-h{color:rgba(196,154,60,0.7)}
+.cal-day-header .dn{font-size:15px;font-weight:700;display:block;color:var(--text-light);line-height:1.2}
+.cal-day-header.today-h .dn{color:var(--blue-deep)}
+.cal-allday{display:grid;grid-template-columns:44px repeat(7,1fr);border-bottom:2px solid var(--panel-border);min-height:32px}
+.cal-allday-lbl{font-size:9px;color:var(--text-pale);padding:5px 3px;text-align:right;font-style:italic;border-right:1px solid var(--panel-border)}
+.cal-allday-cell{border-right:1px solid rgba(180,210,240,0.25);padding:2px;min-height:32px}
+.cal-allday-cell:last-child{border-right:none}
+.cal-scroll{overflow-y:auto;max-height:520px;position:relative}
+.cal-scroll::-webkit-scrollbar{width:4px}
+.cal-scroll::-webkit-scrollbar-thumb{background:var(--blue-pale);border-radius:2px}
+.cal-time-grid{display:grid;grid-template-columns:44px repeat(7,1fr);position:relative}
+.cal-hr-label{font-size:9px;color:var(--text-pale);padding:0 4px 0 0;text-align:right;border-right:1px solid var(--panel-border);height:44px;display:flex;align-items:flex-start;padding-top:2px}
+.cal-hr-cell{height:44px;border-right:1px solid rgba(180,210,240,0.2);border-bottom:1px solid rgba(180,210,240,0.15);cursor:pointer;transition:background .15s}
+.cal-hr-cell:last-child{border-right:none}
+.cal-hr-cell:hover{background:rgba(74,127,212,0.04)}
+.cal-hr-cell.today-col{background:rgba(74,127,212,0.02)}
+.cal-block{position:absolute;left:2px;right:2px;border-radius:4px;padding:2px 5px;font-size:10px;line-height:1.3;overflow:hidden;cursor:pointer;z-index:5;box-shadow:0 1px 3px rgba(0,0,0,0.08)}
+.cal-block.main-b{background:rgba(196,154,60,0.18);border-left:3px solid var(--gold);color:#6a4010}
+.cal-block.side-b{background:rgba(74,127,212,0.14);border-left:3px solid var(--blue-mid);color:var(--blue-deep)}
+.cal-block.done-b{opacity:.38;text-decoration:line-through}
+.cal-block .bn{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cal-block .bt{font-size:9px;opacity:.7}
+.now-line{position:absolute;height:2px;background:var(--blue-mid);z-index:10;pointer-events:none}
+.now-line::before{content:'';position:absolute;left:-4px;top:-4px;width:9px;height:9px;border-radius:50%;background:var(--blue-mid)}
+.month-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.month-dh{text-align:center;font-family:'Cinzel',serif;font-size:7px;font-weight:600;letter-spacing:1px;color:var(--text-pale);padding:5px 0;text-transform:uppercase}
+.month-dh.wk{color:rgba(196,154,60,0.6)}
+.month-cell{min-height:70px;background:rgba(255,255,255,0.52);border:1px solid rgba(180,210,240,0.32);border-radius:7px;padding:4px;cursor:pointer;transition:all .2s}
+.month-cell:hover{background:rgba(255,255,255,0.82);border-color:var(--blue-pale)}
+.month-cell.today-c{background:rgba(220,235,255,0.75);border-color:rgba(74,127,212,0.28)}
+.month-cell.other-m{opacity:.35}
+.month-date{font-family:'Cinzel',serif;font-size:9px;color:var(--text-light);text-align:center;font-weight:600;margin-bottom:2px}
+.month-cell.today-c .month-date{color:var(--blue-deep)}
+.mqi{font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:1px 3px;border-radius:3px;margin-bottom:1px;line-height:1.4}
+.mqi.main-i{background:rgba(196,154,60,0.12);color:#8a6020}
+.mqi.side-i{background:rgba(74,127,212,0.1);color:var(--blue-mid)}
+.mqi.done-i{opacity:.38;text-decoration:line-through}
+.month-more{font-size:8px;color:var(--text-pale);font-style:italic;text-align:center}
+
+.completion-overlay{position:fixed;inset:0;pointer-events:none;z-index:1000;display:flex;align-items:center;justify-content:center}
+.particles{position:absolute;inset:0}
+.particle{position:absolute;border-radius:50%;animation:pfly var(--dur,.8s) ease-out forwards}
+@keyframes pfly{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--tx),var(--ty)) scale(0);opacity:0}}
+.cbanner{font-family:'Cinzel',serif;font-size:15px;font-weight:700;color:var(--blue-deep);text-align:center;line-height:1.8;transform:scale(0);opacity:0;padding:16px 26px;background:rgba(255,255,255,0.98);border:1px solid rgba(196,154,60,0.25);border-radius:14px;box-shadow:0 8px 32px rgba(42,82,152,0.12)}
+.cbanner.pop{animation:bannerPop .5s cubic-bezier(.34,1.56,.64,1) forwards,bannerFade .3s 1.8s ease forwards}
+@keyframes bannerPop{0%{transform:scale(0);opacity:0}100%{transform:scale(1);opacity:1}}
+@keyframes bannerFade{0%{opacity:1}100%{opacity:0}}
+.xp-popup{position:fixed;font-family:'Cinzel',serif;font-size:12px;font-weight:700;color:var(--gold);pointer-events:none;z-index:1001;animation:xpFloat 1.6s ease-out forwards}
+@keyframes xpFloat{0%{transform:translateY(0);opacity:1}100%{transform:translateY(-70px);opacity:0}}
+@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-thumb{background:var(--blue-pale);border-radius:3px}
+</style>
+</head>
+<body>
+<div class="sky"></div>
+<div class="motes" id="motes"></div>
+
+<div id="passwordGate">
+  <div class="gate-box">
+    <div class="gate-ornament">✦ ✦ ✦</div>
+    <div class="gate-title">Unlock Editing</div>
+    <div class="gate-sub">Enter the secret word to add or edit quests</div>
+    <input class="gate-input" id="gateInput" type="password" placeholder="••••••••" autocomplete="off"/>
+    <button class="gate-btn" onclick="checkPassword()">Unlock</button>
+    <div class="gate-error" id="gateError"></div>
+    <button class="gate-cancel" onclick="closeGate(false)">Cancel</button>
+  </div>
+</div>
+
+<button id="addFab" onclick="scrollToAdd()">+</button>
+
+<div class="container">
+  <div class="header">
+    <div class="date-display" id="dateDisplay"></div>
+    <div class="header-ornament">✦ Hero's Record ✦</div>
+    <div class="logo">The Growth Journey</div>
+    <div class="logo-sub">Every step forward counts ✦</div>
+    <div class="header-divider">
+      <div class="divider-line"></div><div class="divider-gem"></div><div class="divider-line"></div>
+    </div>
+    <span id="editLockBtn" class="edit-lock" onclick="toggleEditLock()">🔒 View Only</span>
+  </div>
+
+  <div class="sync-bar">
+    <div class="sync-dot loading" id="syncDot"></div>
+    <span id="syncMsg">Loading quests...</span>
+  </div>
+
+  <div class="panel player-card">
+    <div class="avatar-wrap">
+      <div class="avatar-ring"></div>
+      <img class="avatar-img" src="https://i.ibb.co/chYS9WfT/Chat-GPT-Image-May-11-2026-01-28-36-AM-2.jpg" alt="Ozi"
+        onerror="this.style.display='none';document.getElementById('avatarFallback').style.display='flex'"/>
+      <div class="avatar-placeholder" id="avatarFallback">⚔️</div>
+    </div>
+    <div class="player-info">
+      <div class="player-name">OZI</div>
+      <div class="player-class">On a journey to become better, every day</div>
+      <div class="level-row">
+        <div class="level-badge" id="lvlBadge">LEVEL 1</div>
+        <div class="xp-bar-wrap">
+          <div class="xp-label"><span>Experience</span><span id="xpLabel">0 / 100</span></div>
+          <div class="xp-bar"><div class="xp-fill" id="xpFill" style="width:0%"></div></div>
+        </div>
+      </div>
+      <div class="player-stats">Total XP: <span id="totalXp">0</span> &nbsp;·&nbsp; Streak: <span class="streak" id="streakCount">0</span> days 🔥</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="section-label">Today's Journey</div>
+    <div class="progress-header">
+      <div class="progress-pct" id="pctDisplay">0%</div>
+      <div class="progress-msg" id="pctMsg">The day has just begun...</div>
+    </div>
+    <div class="day-bar"><div class="day-fill" id="dayFill" style="width:0%"></div></div>
+  </div>
+
+  <div class="all-done" id="allDone">
+    <div class="all-done-title">✦ All Quests Cleared ✦</div>
+    <div class="all-done-sub">Like Himmel would say — today was a good day. You gave it your all.</div>
+  </div>
+
+  <div class="quests-grid">
+    <div class="panel quest-panel main">
+      <div class="quest-panel-header">
+        <div class="quest-panel-title">⚔ Main Quest</div>
+        <div class="xp-pill">+100 XP</div>
+      </div>
+      <div id="mainList"></div>
+      <div class="empty-quest" id="mainEmpty">No main quests today.</div>
+    </div>
+    <div class="panel quest-panel side">
+      <div class="quest-panel-header">
+        <div class="quest-panel-title">◎ Side Quest</div>
+        <div class="xp-pill">+30 XP</div>
+      </div>
+      <div id="sideList"></div>
+      <div class="empty-quest" id="sideEmpty">No side quests today.</div>
+    </div>
+  </div>
+
+  <div id="addQuestSection">
+    <div class="panel add-quest-panel">
+      <div class="section-label">Accept New Quest</div>
+      <div class="add-quest-form">
+        <div class="add-form-row">
+          <input class="qi name" id="qName" placeholder="Describe your quest..." autocomplete="off"/>
+        </div>
+        <div class="add-form-row">
+          <select class="qs" id="qCat" onchange="handleCat()">
+            <option>Review</option><option>Research</option><option>Create</option>
+            <option>Edit</option><option>Meeting</option><option>Action</option>
+            <option value="Others">Others...</option>
+          </select>
+          <div class="others-wrap" id="qOthersWrap">
+            <input class="qi others-inp" id="qOthersInput" placeholder="Category..."/>
+          </div>
+          <select class="qs" id="qSize">
+            <option value="quick">⚡ Quick</option>
+            <option value="deep">🔥 Deep Work</option>
+          </select>
+        </div>
+        <div class="add-form-row">
+          <input class="qi time-inp" id="qTime" type="time"/>
+          <input class="qi dl-inp" id="qDl" type="datetime-local"/>
+        </div>
+        <div class="add-btn-row">
+          <button class="add-main-btn" onclick="addQuest('main')">⚔ Add Main Quest</button>
+          <button class="add-side-btn" onclick="addQuest('side')">◎ Add Side Quest</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cal-wrap">
+    <div class="panel" style="padding:14px">
+      <div class="cal-header">
+        <div class="cal-nav">
+          <button class="cal-nav-btn" onclick="calNav(-1)">‹</button>
+          <div class="cal-title" id="calTitle"></div>
+          <button class="cal-nav-btn" onclick="calNav(1)">›</button>
+        </div>
+        <div class="cal-controls">
+          <button class="cal-today-btn" onclick="calGoToday()">Today</button>
+          <div class="cal-view-toggle">
+            <button class="cal-view-btn active" onclick="setCalView('week',this)">Week</button>
+            <button class="cal-view-btn" onclick="setCalView('month',this)">Month</button>
+          </div>
+        </div>
+      </div>
+      <div id="calContainer"></div>
+    </div>
+  </div>
+</div>
+
+<div class="completion-overlay">
+  <div class="particles" id="particles"></div>
+  <div class="cbanner" id="cbanner"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// CONFIG — Notion Direct API
+// ═══════════════════════════════════════════
+const SUPABASE_URL  = 'https://qhfugpmtqrirasabdofv.supabase.co';
+const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFoZnVncG10cXJpcmFzYWJkb2Z2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0MjczMTYsImV4cCI6MjA5NDAwMzMxNn0.KIY_agXXpz9hYDmcz9SaR0tkQTu1dWDuMyl5LESLUNo';
+const CORRECT_PW    = 'ozirru';
+
+async function sbFetch(path, method='GET', body=null) {
+  const r = await fetch(SUPABASE_URL + '/rest/v1/' + path, {
+    method,
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=representation'
+    },
+    body: body ? JSON.stringify(body) : null
+  });
+  if (!r.ok) throw new Error(await r.text());
+  const t = await r.text();
+  return t ? JSON.parse(t) : null;
+}
+
+// ── State ──────────────────────────────────
+let quests=[], playerXp={id:null,total_xp:0,streak:0};
+let editUnlocked=sessionStorage.getItem('tgj_unlocked')==='1';
+let calView='week', calOffset=0, calCache={};
+let pendingAction=null;
+
+// ── Level ──────────────────────────────────
+const LVL=[0];
+for(let i=1;i<=99;i++)LVL.push(Math.floor(100*Math.pow(1.15,i-1)));
+function getLvl(x){let r=x,l=1;while(l<99&&r>=LVL[l]){r-=LVL[l];l++;}return{l,cur:r,need:LVL[l]};}
+
+// ── Audio ──────────────────────────────────
+let audioCtx=null;
+function getACtx(){if(!audioCtx)try{audioCtx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}return audioCtx;}
+function tone(f,d,type='triangle',v=0.2){const c=getACtx();if(!c)return;const o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type=type;o.frequency.value=f;g.gain.setValueAtTime(v,c.currentTime);g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+d);o.start();o.stop(c.currentTime+d);}
+function sfxClick(){tone(880,.07,'sine',.12);}
+function sfxAccepted(){[523,659,784,1047].forEach((f,i)=>setTimeout(()=>tone(f,.14,'triangle',.22),i*75));}
+function sfxCleared(){[[523,.35],[659,.35],[784,.35],[1047,.45],[1568,.55]].forEach(([f,d],i)=>setTimeout(()=>tone(f,d,'triangle',.18),i*55));}
+function sfxProgress(){tone(440,.09,'triangle',.13);setTimeout(()=>tone(554,.09,'triangle',.11),90);}
+function sfxUnlock(){[392,494,587,784].forEach((f,i)=>setTimeout(()=>tone(f,.11,'triangle',.18),i*65));}
+
+// ── Password ───────────────────────────────
+function requireAuth(action){
+  if(editUnlocked){action&&action();return;}
+  pendingAction=action;
+  document.getElementById('passwordGate').style.display='flex';
+  setTimeout(()=>document.getElementById('gateInput').focus(),100);
+}
+function closeGate(ok){
+  document.getElementById('passwordGate').style.display='none';
+  document.getElementById('gateInput').value='';
+  document.getElementById('gateError').textContent='';
+  if(ok){editUnlocked=true;sessionStorage.setItem('tgj_unlocked','1');sfxUnlock();updateEditUI();if(pendingAction){pendingAction();pendingAction=null;}}
+  else pendingAction=null;
+}
+function checkPassword(){
+  if(document.getElementById('gateInput').value===CORRECT_PW)closeGate(true);
+  else{document.getElementById('gateError').textContent='Incorrect password.';document.getElementById('gateInput').value='';}
+}
+function toggleEditLock(){
+  sfxClick();
+  if(editUnlocked){editUnlocked=false;sessionStorage.removeItem('tgj_unlocked');updateEditUI();}
+  else requireAuth(null);
+}
+function updateEditUI(){
+  const btn=document.getElementById('editLockBtn');
+  if(editUnlocked){btn.innerHTML='🔓 Editing';btn.className='edit-lock unlocked';}
+  else{btn.innerHTML='🔒 View Only';btn.className='edit-lock';}
+}
+document.getElementById('gateInput').addEventListener('keydown',e=>{if(e.key==='Enter')checkPassword();});
+
+// ── Init ───────────────────────────────────
+async function init() {
+  setSyncStatus('loading', 'Loading quests...');
+  try {
+    const today = todayStr();
+    const data = await sbFetch(`quests?quest_date=eq.${today}&order=start_time.asc`);
+    quests = data || [];
+    const xpData = await sbFetch('player_xp?id=eq.1');
+    if (xpData && xpData.length) playerXp = xpData[0];
+    setSyncStatus('ok', 'Synced ✦');
+    render();
+    renderCalendar();
+  } catch(e) {
+    setSyncStatus('err', 'Connection failed: ' + e.message);
+    console.error(e);
+  }
+}
+
+function setSyncStatus(s,m){
+  document.getElementById('syncDot').className='sync-dot '+s;
+  document.getElementById('syncMsg').textContent=m;
+}
+
+function todayStr(){return new Date().toISOString().split('T')[0];}
+
+// ── Category ───────────────────────────────
+function handleCat(){
+  const v=document.getElementById('qCat').value;
+  document.getElementById('qOthersWrap').className='others-wrap'+(v==='Others'?' show':'');
+}
+function getCat(){
+  const v=document.getElementById('qCat').value;
+  if(v==='Others'){const o=document.getElementById('qOthersInput').value.trim();return o||'Others';}
+  return v;
+}
+
+// ── Add Quest ──────────────────────────────
+function addQuest(type) {
+  sfxClick();
+  requireAuth(async () => {
+    const name = document.getElementById('qName').value.trim();
+    if (!name) return;
+    const forDate = document.getElementById('qName').dataset.forDate || todayStr();
+    const quest = {
+      name, type, category: getCat(),
+      size: document.getElementById('qSize').value,
+      start_time: document.getElementById('qTime').value || null,
+      deadline: document.getElementById('qDl').value || null,
+      quest_date: forDate, status: 'todo'
+    };
+    try {
+      setSyncStatus('loading', 'Saving...');
+      const res = await sbFetch('quests', 'POST', quest);
+      const saved = Array.isArray(res) ? res[0] : res;
+      if (saved && (saved.quest_date === todayStr() || !saved.quest_date)) quests.push(saved);
+      document.getElementById('qName').value = '';
+      document.getElementById('qName').dataset.forDate = '';
+      document.getElementById('qTime').value = '';
+      document.getElementById('qDl').value = '';
+      sfxAccepted();
+      calCache = {};
+      setSyncStatus('ok', 'Synced ✦');
+      render();
+      renderCalendar();
+    } catch(e) { setSyncStatus('err', 'Save failed'); console.error(e); }
+  });
+}
+
+function scrollToAdd(){
+  sfxClick();
+  document.getElementById('addQuestSection').scrollIntoView({behavior:'smooth',block:'center'});
+  setTimeout(()=>document.getElementById('qName').focus(),400);
+}
+
+// ── Cycle Status ───────────────────────────
+async function cycleStatus(id, el) {
+  requireAuth(async () => {
+    const q = quests.find(x => x.id === id);
+    if (!q) return;
+    const prev = q.status;
+    q.status = {todo:'in-progress','in-progress':'done',done:'todo'}[q.status] || 'todo';
+    el.className = 'quest-item' + (q.status==='done'?' done':q.status==='in-progress'?' in-progress':'');
+
+    let xpDelta = 0;
+    if (q.status==='done' && prev!=='done') {
+      let xp = q.type==='main' ? 100 : 30;
+      if (q.deadline && new Date() > new Date(q.deadline)) xp = Math.floor(xp * .5);
+      xpDelta = xp;
+      playerXp.total_xp = (playerXp.total_xp||0) + xp;
+      showCompletion(xp, el);
+      sfxCleared();
+    } else if (q.status==='in-progress') {
+      sfxProgress();
+    } else if (q.status==='todo' && prev==='done') {
+      let xp = q.type==='main' ? 100 : 30;
+      if (q.deadline && new Date() > new Date(q.deadline)) xp = Math.floor(xp * .5);
+      playerXp.total_xp = Math.max(0, (playerXp.total_xp||0) - xp);
+      sfxClick();
+    }
+
+    renderProgress();
+    renderXP();
+
+    try {
+      await sbFetch(`quests?id=eq.${q.id}`, 'PATCH', { status: q.status });
+      if (xpDelta) await sbFetch('player_xp?id=eq.1', 'PATCH', { total_xp: playerXp.total_xp });
+      calCache = {};
+    } catch(e) { console.error('Sync error:', e); }
+  });
+}
+
+// ── Render ─────────────────────────────────
+function render(){renderQuests();renderProgress();renderXP();}
+
+function renderQuests(){
+  const tq=[...quests].sort((a,b)=>(a.start_time||'99:99').localeCompare(b.start_time||'99:99'));
+  ['main','side'].forEach(t=>{
+    const list=document.getElementById(t+'List'),empty=document.getElementById(t+'Empty');
+    const items=tq.filter(q=>q.type===t);
+    list.innerHTML='';empty.style.display=items.length?'none':'block';
+    items.forEach(q=>list.appendChild(makeItem(q)));
+  });
+}
+
+function makeItem(q){
+  const div=document.createElement('div');
+  div.className='quest-item'+(q.status==='done'?' done':q.status==='in-progress'?' in-progress':'');
+  const dl=q.deadline?fmtDL(q.deadline):'',soon=q.deadline&&isSoon(q.deadline);
+  div.innerHTML=`
+    <div class="quest-top">
+      <div class="qcheck">${q.status==='done'?'✓':q.status==='in-progress'?'◐':''}</div>
+      <div class="qname">${q.name}</div>
+      <div class="cleared-badge">Cleared</div>
+    </div>
+    <div class="qmeta">
+      ${q.start_time?`<span class="qtime">⌚ ${q.start_time}</span>`:''}
+      ${dl?`<span class="qdeadline${soon?' soon':''}">${dl}</span>`:''}
+      <span class="qcat">${q.category||''}</span>
+      <span class="qqxp">${q.type==='main'?'+100':'+30'} XP</span>
+    </div>`;
+  div.addEventListener('click',()=>cycleStatus(q.id,div));
+  return div;
+}
+
+function fmtDL(dl){
+  const d=new Date(dl),diff=d-new Date();
+  if(diff<0)return'⚠ Overdue';
+  const h=Math.floor(diff/3600000),m=Math.floor((diff%3600000)/60000);
+  if(h===0)return`⚡ ${m}m left`;
+  if(h<4)return`⏰ ${h}h ${m}m left`;
+  return`📅 ${d.toLocaleDateString('id-ID',{day:'numeric',month:'short'})} ${d.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})}`;
+}
+function isSoon(dl){const d=new Date(dl)-new Date();return d>0&&d<3600000;}
+
+function renderProgress(){
+  const total=quests.length,done=quests.filter(q=>q.status==='done').length;
+  const pct=total?Math.round(done/total*100):0;
+  document.getElementById('pctDisplay').textContent=pct+'%';
+  document.getElementById('dayFill').style.width=pct+'%';
+  const msgs=['The day has just begun...','Taking the first steps...','Making steady progress...','Over halfway there!','Almost complete — push through!','Like Himmel would say — today was a good day.'];
+  document.getElementById('pctMsg').textContent=msgs[pct===0?0:pct<25?1:pct<50?2:pct<75?3:pct<100?4:5];
+  document.getElementById('allDone').className='all-done'+(pct===100&&total>0?' show':'');
+}
+
+function renderXP(){
+  const info=getLvl(playerXp.total_xp||0);
+  document.getElementById('lvlBadge').textContent='LEVEL '+info.l;
+  document.getElementById('xpLabel').textContent=info.cur+' / '+info.need;
+  document.getElementById('xpFill').style.width=Math.round(info.cur/info.need*100)+'%';
+  document.getElementById('totalXp').textContent=playerXp.total_xp||0;
+  document.getElementById('streakCount').textContent=playerXp.streak||0;
+}
+
+// ── Calendar ───────────────────────────────
+function setCalView(v,btn){
+  calView=v;calOffset=0;calCache={};
+  document.querySelectorAll('.cal-view-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');sfxClick();renderCalendar();
+}
+function calNav(d){sfxClick();calOffset+=d;calCache={};renderCalendar();}
+function calGoToday(){sfxClick();calOffset=0;calCache={};renderCalendar();}
+
+async function fetchRange(s,e){
+  const k=s+'_'+e;
+  if(calCache[k])return calCache[k];
+  try{
+    const data=await sbFetch(`quests?quest_date=gte.${s}&quest_date=lte.${e}&order=start_time.asc`);
+    const results=data||[];
+    calCache[k]=results;
+    const ids=new Set(quests.map(q=>String(q.id)));
+    results.forEach(q=>{if(!ids.has(String(q.id)))quests.push(q);});
+    return results;
+  }catch(e){return quests.filter(q=>q.quest_date>=s&&q.quest_date<=e);}
+}
+
+async function renderCalendar(){
+  if(calView==='week')await renderWeek();
+  else await renderMonth();
+}
+
+async function renderWeek(){
+  const now=new Date();
+  const base=new Date(now);
+  const dow=base.getDay()===0?6:base.getDay()-1;
+  base.setDate(base.getDate()-dow+calOffset*7);
+  const mon=new Date(base);
+  const sun=new Date(mon);sun.setDate(mon.getDate()+6);
+  const s=mon.toISOString().split('T')[0],e=sun.toISOString().split('T')[0];
+  const mN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  document.getElementById('calTitle').textContent=`${mon.getDate()} ${mN[mon.getMonth()]} – ${sun.getDate()} ${mN[sun.getMonth()]} ${sun.getFullYear()}`;
+  const wq=await fetchRange(s,e);
+  const dN=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const dates=[];for(let i=0;i<7;i++){const d=new Date(mon);d.setDate(mon.getDate()+i);dates.push(d);}
+
+  let html=`<div class="cal-day-headers"><div></div>`;
+  dates.forEach((d,i)=>{
+    const ds=d.toISOString().split('T')[0];
+    const isT=ds===todayStr(),isW=i>=5;
+    html+=`<div class="cal-day-header${isT?' today-h':''}${isW?' wkend-h':''}">${dN[i]}<span class="dn">${d.getDate()}</span></div>`;
+  });
+  html+='</div>';
+
+  html+=`<div class="cal-allday"><div class="cal-allday-lbl">all‑day</div>`;
+  dates.forEach(d=>{
+    const ds=d.toISOString().split('T')[0];
+    const ad=wq.filter(q=>q.quest_date===ds&&!q.start_time);
+    html+=`<div class="cal-allday-cell" onclick="setDateAndScroll('${ds}')">`;
+    ad.slice(0,2).forEach(q=>{html+=`<div style="font-size:9px;padding:1px 3px;border-radius:3px;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:${q.type==='main'?'rgba(196,154,60,0.15)':'rgba(74,127,212,0.12)'};color:${q.type==='main'?'#8a6020':'var(--blue-deep)'}">${q.name}</div>`;});
+    if(ad.length>2)html+=`<div style="font-size:8px;color:var(--text-pale)">+${ad.length-2}</div>`;
+    html+='</div>';
+  });
+  html+='</div>';
+
+  html+=`<div class="cal-scroll"><div class="cal-time-grid" id="tGrid">`;
+  for(let h=0;h<24;h++){
+    html+=`<div class="cal-hr-label">${h.toString().padStart(2,'0')}:00</div>`;
+    dates.forEach((d,di)=>{
+      const ds=d.toISOString().split('T')[0];
+      html+=`<div class="cal-hr-cell${ds===todayStr()?' today-col':''}" onclick="setDateAndScrollHour('${ds}',${h})"></div>`;
+    });
+  }
+  html+='</div></div>';
+  document.getElementById('calContainer').innerHTML=html;
+
+  const grid=document.getElementById('tGrid');
+  grid.style.position='relative';
+  dates.forEach((d,ci)=>{
+    const ds=d.toISOString().split('T')[0];
+    wq.filter(q=>q.quest_date===ds&&q.start_time).forEach(q=>{
+      const[hh,mm]=q.start_time.split(':');
+      const sMin=parseInt(hh)*60+parseInt(mm||0);
+      const dur=q.size==='deep'?90:60;
+      const top=(sMin/60)*44,ht=Math.max((dur/60)*44,22);
+      const b=document.createElement('div');
+      b.className=`cal-block ${q.type}-b${q.status==='done'?' done-b':''}`;
+      b.style.cssText=`position:absolute;top:${top}px;height:${ht}px;left:calc(44px + ${ci}*(100% - 44px)/7 + 2px);width:calc((100% - 44px)/7 - 4px)`;
+      b.innerHTML=`<div class="bn">${q.name}</div><div class="bt">${q.start_time}</div>`;
+      b.addEventListener('click',ev=>{ev.stopPropagation();sfxClick();cycleStatus(q.id,b);});
+      grid.appendChild(b);
+    });
+  });
+
+  const todayIdx=dates.findIndex(d=>d.toISOString().split('T')[0]===todayStr());
+  if(todayIdx>=0){
+    const nowMin=now.getHours()*60+now.getMinutes();
+    const line=document.createElement('div');
+    line.className='now-line';
+    line.style.cssText=`position:absolute;top:${(nowMin/60)*44}px;left:calc(44px + ${todayIdx}*(100% - 44px)/7);width:calc((100% - 44px)/7)`;
+    grid.appendChild(line);
+    setTimeout(()=>{const sc=document.querySelector('.cal-scroll');if(sc)sc.scrollTop=Math.max(0,(nowMin/60)*44-180);},100);
+  }
+}
+
+async function renderMonth(){
+  const now=new Date();
+  const base=new Date(now.getFullYear(),now.getMonth()+calOffset,1);
+  const y=base.getFullYear(),mo=base.getMonth();
+  const mN=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('calTitle').textContent=`${mN[mo]} ${y}`;
+  const first=new Date(y,mo,1),last=new Date(y,mo+1,0);
+  const s=first.toISOString().split('T')[0],e=last.toISOString().split('T')[0];
+  const mq=await fetchRange(s,e);
+  const startDow=first.getDay()===0?6:first.getDay()-1;
+  const dN=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  let html=`<div class="month-grid">`;
+  dN.forEach((d,i)=>html+=`<div class="month-dh${i>=5?' wk':''}">${d}</div>`);
+  for(let i=0;i<startDow;i++){const d=new Date(y,mo,1-startDow+i);html+=`<div class="month-cell other-m"><div class="month-date">${d.getDate()}</div></div>`;}
+  for(let d=1;d<=last.getDate();d++){
+    const dd=new Date(y,mo,d),ds=dd.toISOString().split('T')[0];
+    const isT=ds===todayStr();
+    const dq=mq.filter(q=>q.quest_date===ds).sort((a,b)=>(a.start_time||'99:99').localeCompare(b.start_time||'99:99'));
+    const vis=dq.slice(0,3),more=dq.length-3;
+    html+=`<div class="month-cell${isT?' today-c':''}" onclick="setDateAndScroll('${ds}')">
+      <div class="month-date">${d}</div>
+      ${vis.map(q=>`<div class="mqi ${q.type}-i${q.status==='done'?' done-i':''}">${q.name}</div>`).join('')}
+      ${more>0?`<div class="month-more">+${more}</div>`:''}
+    </div>`;
+  }
+  html+='</div>';
+  document.getElementById('calContainer').innerHTML=html;
+}
+
+function setDateAndScroll(ds){
+  sfxClick();
+  requireAuth(()=>{
+    document.getElementById('qName').dataset.forDate=ds;
+    document.getElementById('addQuestSection').scrollIntoView({behavior:'smooth',block:'center'});
+    setTimeout(()=>document.getElementById('qName').focus(),400);
+  });
+}
+
+function setDateAndScrollHour(ds,h){
+  sfxClick();
+  requireAuth(()=>{
+    document.getElementById('qName').dataset.forDate=ds;
+    document.getElementById('qTime').value=h.toString().padStart(2,'0')+':00';
+    document.getElementById('addQuestSection').scrollIntoView({behavior:'smooth',block:'center'});
+    setTimeout(()=>document.getElementById('qName').focus(),400);
+  });
+}
+
+// ── Completion FX ──────────────────────────
+function showCompletion(xp,el){
+  const rect=el.getBoundingClientRect();
+  const pop=document.createElement('div');
+  pop.className='xp-popup';pop.textContent='+'+xp+' XP';
+  pop.style.cssText=`left:${rect.left+8}px;top:${rect.top+window.scrollY}px`;
+  document.body.appendChild(pop);setTimeout(()=>pop.remove(),1700);
+  const pc=document.getElementById('particles');pc.innerHTML='';
+  const cols=['#c49a3c','#4a7fd4','#7aaee8','#e8c97a','#5a9a6a'];
+  for(let i=0;i<22;i++){
+    const p=document.createElement('div');p.className='particle';
+    const sz=3+Math.random()*6;
+    p.style.cssText=`width:${sz}px;height:${sz}px;background:${cols[i%cols.length]};left:${rect.left+rect.width/2}px;top:${rect.top+rect.height/2}px`;
+    p.style.setProperty('--tx',(Math.random()-.5)*200+'px');
+    p.style.setProperty('--ty',(Math.random()-.85)*150+'px');
+    p.style.setProperty('--dur',(.4+Math.random()*.7)+'s');
+    pc.appendChild(p);
+  }
+  const b=document.getElementById('cbanner');
+  b.className='cbanner';void b.offsetWidth;
+  b.innerHTML=`Quest Cleared ✦<br><span style="font-size:12px;color:var(--gold);font-family:'Crimson Pro',serif;font-style:italic">+${xp} Experience Gained</span>`;
+  b.className='cbanner pop';
+  setTimeout(()=>{pc.innerHTML='';b.className='cbanner';},2600);
+}
+
+// ── Motes ──────────────────────────────────
+function initMotes(){
+  const w=document.getElementById('motes');
+  for(let i=0;i<14;i++){
+    const m=document.createElement('div');m.className='mote';
+    const sz=2+Math.random()*4;
+    m.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%`;
+    m.style.setProperty('--dur',(6+Math.random()*10)+'s');
+    m.style.setProperty('--op',(0.4+Math.random()*0.5).toFixed(2));
+    m.style.setProperty('--ty',-(60+Math.random()*100)+'px');
+    m.style.setProperty('--tx',(Math.random()-.5)*60+'px');
+    m.style.animationDelay=(Math.random()*10)+'s';
+    w.appendChild(m);
+  }
+}
+
+function updateDate(){
+  const d=new Date();
+  const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('dateDisplay').innerHTML=`${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}<br><span style="font-size:10px">${d.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})}</span>`;
+}
+
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.getElementById('passwordGate').style.display==='flex')closeGate(false);});
+setInterval(updateDate,1000);
+setInterval(()=>renderCalendar(),120000);
+
+initMotes();updateDate();updateEditUI();init();
+</script>
+</body>
+</html>
