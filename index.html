@@ -169,7 +169,7 @@ body{min-height:100vh;font-family:'Crimson Pro',Georgia,serif;font-size:17px;col
 .cal-allday-lbl{font-size:9px;color:var(--text-pale);padding:5px 3px;text-align:right;font-style:italic;border-right:1px solid var(--panel-border)}
 .cal-allday-cell{border-right:1px solid rgba(180,210,240,0.25);padding:2px;min-height:32px}
 .cal-allday-cell:last-child{border-right:none}
-.cal-scroll{overflow-y:auto;max-height:520px;position:relative}
+.cal-scroll{overflow-y:auto;max-height:360px;position:relative}
 .cal-scroll::-webkit-scrollbar{width:4px}
 .cal-scroll::-webkit-scrollbar-thumb{background:var(--blue-pale);border-radius:2px}
 .cal-time-grid{display:grid;grid-template-columns:44px repeat(7,1fr);position:relative}
@@ -217,6 +217,44 @@ body{min-height:100vh;font-family:'Crimson Pro',Georgia,serif;font-size:17px;col
 ::-webkit-scrollbar{width:5px}
 ::-webkit-scrollbar-thumb{background:var(--blue-pale);border-radius:3px}
 </style>
+<script src="https://www.youtube.com/iframe_api"></script>
+<script>
+var ytPlayer;
+var ytReady = false;
+
+function onYouTubeIframeAPIReady() {
+  ytPlayer = new YT.Player('pomoYT', {
+    height: '80',
+    width: '100%',
+    videoId: 'u3EBlmzb9ds',
+    playerVars: {
+      autoplay: 0,
+      controls: 1,
+      rel: 0,
+      modestbranding: 1,
+      loop: 1,
+      playlist: 'u3EBlmzb9ds'
+    },
+    events: {
+      onReady: function() { ytReady = true; }
+    }
+  });
+}
+
+function ytPlay() {
+  const sync = document.getElementById('pomoMusicSync');
+  if (ytReady && ytPlayer && sync && sync.checked) {
+    ytPlayer.playVideo();
+  }
+}
+
+function ytPause() {
+  const sync = document.getElementById('pomoMusicSync');
+  if (ytReady && ytPlayer && sync && sync.checked) {
+    ytPlayer.pauseVideo();
+  }
+}
+</script>
 </head>
 <body>
 <div class="sky"></div>
@@ -263,15 +301,25 @@ body{min-height:100vh;font-family:'Crimson Pro',Georgia,serif;font-size:17px;col
     <div class="player-info">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px">
         <div class="player-name">OZI</div>
-        <button onclick="openNewQuestModal()" style="
-          background:linear-gradient(135deg,var(--blue-mid),var(--blue-deep));
-          color:white;border:none;border-radius:20px;
-          font-family:'Cinzel',serif;font-size:8px;font-weight:600;
-          letter-spacing:1px;padding:5px 14px;cursor:pointer;
-          box-shadow:0 2px 10px rgba(42,82,152,0.3);
-          transition:all .2s;white-space:nowrap;flex-shrink:0;
-        " onmouseover="this.style.transform='translateY(-1px)'"
-           onmouseout="this.style.transform='translateY(0)'">✦ NEW QUEST</button>
+        <div style="display:flex;gap:6px;flex-shrink:0">
+          <button onclick="openNewQuestModal()" style="
+            background:linear-gradient(135deg,var(--blue-mid),var(--blue-deep));
+            color:white;border:none;border-radius:20px;
+            font-family:'Cinzel',serif;font-size:8px;font-weight:600;
+            letter-spacing:1px;padding:5px 12px;cursor:pointer;
+            box-shadow:0 2px 10px rgba(42,82,152,0.3);
+            transition:all .2s;white-space:nowrap;
+          " onmouseover="this.style.transform='translateY(-1px)'"
+             onmouseout="this.style.transform='translateY(0)'">✦ New Quest</button>
+          <button onclick="openPomoModal()" style="
+            background:rgba(255,255,255,0.7);
+            color:var(--text-light);border:1px solid var(--panel-border);border-radius:20px;
+            font-family:'Cinzel',serif;font-size:8px;font-weight:600;
+            letter-spacing:1px;padding:5px 12px;cursor:pointer;
+            transition:all .2s;white-space:nowrap;
+          " onmouseover="this.style.background='white';this.style.color='var(--blue-mid)'"
+             onmouseout="this.style.background='rgba(255,255,255,0.7)';this.style.color='var(--text-light)'">⏱ Focus</button>
+        </div>
       </div>
       <div class="player-class" id="dailyQuote">On a journey to become better, every day</div>
       <div class="level-row">
@@ -300,10 +348,10 @@ body{min-height:100vh;font-family:'Crimson Pro',Georgia,serif;font-size:17px;col
   </div>
 
   <!-- Day Slider -->
-  <div class="day-slider" id="daySlider">
-    <button class="day-slider-btn" onclick="shiftDay(-1)">‹</button>
-    <div class="day-tabs" id="dayTabs"></div>
-    <button class="day-slider-btn" onclick="shiftDay(1)">›</button>
+  <div id="daySlider" style="display:flex;flex-direction:row;align-items:center;gap:8px;margin-bottom:14px;background:rgba(255,255,255,0.6);border:1px solid var(--panel-border);border-radius:40px;padding:6px 10px;backdrop-filter:blur(8px)">
+    <button onclick="shiftDay(-1)" style="background:none;border:none;color:var(--text-pale);font-size:16px;cursor:pointer;padding:2px 6px;border-radius:20px;transition:all .2s;line-height:1;flex-shrink:0;font-family:serif">‹</button>
+    <div id="dayTabs" style="display:flex;flex-direction:row;gap:4px;flex:1;overflow-x:auto;scrollbar-width:none"></div>
+    <button onclick="shiftDay(1)" style="background:none;border:none;color:var(--text-pale);font-size:16px;cursor:pointer;padding:2px 6px;border-radius:20px;transition:all .2s;line-height:1;flex-shrink:0;font-family:serif">›</button>
   </div>
 
   <div class="quests-grid">
@@ -461,10 +509,10 @@ body{min-height:100vh;font-family:'Crimson Pro',Georgia,serif;font-size:17px;col
       <!-- Header -->
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
         <div style="font-family:'Cinzel',serif;font-size:10px;font-weight:600;letter-spacing:3px;color:var(--text-light);text-transform:uppercase">Focus Timer</div>
-        <div style="display:flex;gap:4px;background:rgba(180,210,240,0.2);border-radius:20px;padding:3px">
-          <button class="pomo-mode-btn active" id="pmFocus" onclick="setPomoMode('focus',this)">Focus</button>
-          <button class="pomo-mode-btn" id="pmShort" onclick="setPomoMode('short',this)">Short Break</button>
-          <button class="pomo-mode-btn" id="pmLong" onclick="setPomoMode('long',this)">Long Break</button>
+        <div style="display:flex;gap:4px;background:rgba(180,210,240,0.15);border-radius:20px;padding:3px;border:1px solid var(--panel-border)">
+          <button id="pmFocus" onclick="setPomoMode('focus',this)" style="padding:4px 10px;border-radius:16px;border:none;cursor:pointer;font-family:'Cinzel',serif;font-size:8px;font-weight:600;letter-spacing:1px;color:var(--blue-deep);background:white;box-shadow:0 1px 4px rgba(42,82,152,0.1);transition:all .2s">Focus</button>
+          <button id="pmShort" onclick="setPomoMode('short',this)" style="padding:4px 10px;border-radius:16px;border:none;cursor:pointer;font-family:'Cinzel',serif;font-size:8px;font-weight:600;letter-spacing:1px;color:var(--text-light);background:transparent;transition:all .2s">Short</button>
+          <button id="pmLong" onclick="setPomoMode('long',this)" style="padding:4px 10px;border-radius:16px;border:none;cursor:pointer;font-family:'Cinzel',serif;font-size:8px;font-weight:600;letter-spacing:1px;color:var(--text-light);background:transparent;transition:all .2s">Long</button>
         </div>
       </div>
 
@@ -487,17 +535,21 @@ body{min-height:100vh;font-family:'Crimson Pro',Georgia,serif;font-size:17px;col
         </div>
       </div>
 
-      <!-- YouTube music -->
-      <div style="margin-bottom:16px">
-        <div style="font-size:11px;color:var(--text-pale);font-style:italic;text-align:center;margin-bottom:8px;letter-spacing:1px">♪ FRIEREN OST</div>
-        <div style="border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(42,82,152,0.1)">
-          <iframe id="pomoYT" width="100%" height="80"
-            src="https://www.youtube.com/embed/u3EBlmzb9ds?si=o79QHOXGBSiy9gdj&start=0&rel=0&modestbranding=1"
-            title="Frieren OST" frameborder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowfullscreen style="display:block">
-          </iframe>
+      <!-- YouTube music (hidden player) -->
+      <div id="pomoYT" style="position:absolute;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding:10px 14px;background:rgba(255,255,255,0.6);border:1px solid var(--panel-border);border-radius:10px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:14px">♪</span>
+          <div>
+            <div style="font-family:'Cinzel',serif;font-size:9px;font-weight:600;letter-spacing:1px;color:var(--text-dark)">Frieren OST</div>
+            <div style="font-size:11px;color:var(--text-pale);font-style:italic">Plays with timer</div>
+          </div>
         </div>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+          <span style="font-size:11px;color:var(--text-light)">Sync</span>
+          <input type="checkbox" id="pomoMusicSync" checked onchange="sfxClick()"
+            style="width:14px;height:14px;accent-color:var(--blue-mid)"/>
+        </label>
       </div>
 
       <!-- Linked quest -->
@@ -1309,9 +1361,15 @@ function setPomoMode(mode, btn) {
   pomoMode = mode;
   pomoSecondsLeft = POMO_MODES[mode].minutes * 60;
   pomoTotalSeconds = pomoSecondsLeft;
-  document.querySelectorAll('.pomo-mode-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
+  // Reset all mode buttons
+  ['pmFocus','pmShort','pmLong'].forEach(id => {
+    const b = document.getElementById(id);
+    if (b) { b.style.background = 'transparent'; b.style.color = 'var(--text-light)'; b.style.boxShadow = 'none'; }
+  });
+  // Activate selected
+  if (btn) { btn.style.background = 'white'; btn.style.color = 'var(--blue-deep)'; btn.style.boxShadow = '0 1px 4px rgba(42,82,152,0.1)'; }
   document.getElementById('pomoTimeLabel').textContent = POMO_MODES[mode].label;
+  document.getElementById('pomoPillLabel').textContent = POMO_MODES[mode].label;
   updatePomoDisplay();
   drawPomoRing(1);
   sfxClick();
@@ -1323,11 +1381,13 @@ function pomoToggle() {
     clearInterval(pomoTimer);
     document.getElementById('pomoPlayBtn').textContent = '▶';
     document.getElementById('pomoPillPlay').textContent = '▶';
+    ytPause();
     sfxClick();
   } else {
     pomoRunning = true;
     document.getElementById('pomoPlayBtn').textContent = '⏸';
     document.getElementById('pomoPillPlay').textContent = '⏸';
+    ytPlay();
     sfxClick();
     pomoTimer = setInterval(() => {
       pomoSecondsLeft--;
@@ -1347,6 +1407,7 @@ function pomoReset() {
   pomoTotalSeconds = pomoSecondsLeft;
   document.getElementById('pomoPlayBtn').textContent = '▶';
   document.getElementById('pomoPillPlay').textContent = '▶';
+  ytPause();
   updatePomoDisplay();
   drawPomoRing(1);
   sfxClick();
@@ -1394,8 +1455,15 @@ function setPomoModeAuto(mode) {
   pomoSecondsLeft = POMO_MODES[mode].minutes * 60;
   pomoTotalSeconds = pomoSecondsLeft;
   document.getElementById('pomoTimeLabel').textContent = POMO_MODES[mode].label;
-  document.querySelectorAll('.pomo-mode-btn').forEach((b,i) => {
-    b.classList.toggle('active', ['focus','short','long'][i] === mode);
+  document.getElementById('pomoPillLabel').textContent = POMO_MODES[mode].label;
+  const modeMap = {focus:'pmFocus', short:'pmShort', long:'pmLong'};
+  ['pmFocus','pmShort','pmLong'].forEach(id => {
+    const b = document.getElementById(id);
+    if (!b) return;
+    const isActive = modeMap[mode] === id;
+    b.style.background = isActive ? 'white' : 'transparent';
+    b.style.color = isActive ? 'var(--blue-deep)' : 'var(--text-light)';
+    b.style.boxShadow = isActive ? '0 1px 4px rgba(42,82,152,0.1)' : 'none';
   });
   updatePomoDisplay();
   drawPomoRing(1);
