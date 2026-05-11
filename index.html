@@ -254,7 +254,7 @@ body{min-height:100vh;font-family:'Crimson Pro',Georgia,serif;font-size:17px;col
   <div class="panel player-card">
     <div class="avatar-wrap">
       <div class="avatar-ring"></div>
-      <img class="avatar-img" src="https://i.ibb.co/chYS9WfT/Chat-GPT-Image-May-11-2026-01-28-36-AM-2.jpg" alt="Ozi"
+      <img class="avatar-img" src="https://raw.githubusercontent.com/ozirru/the-growth-journey/refs/heads/main/ChatGPT%20Image%20May%2011%2C%202026%2C%2001_28_36%20AM%20(2).svg" alt="Ozi"
         onerror="this.style.display='none';document.getElementById('avatarFallback').style.display='flex'"/>
       <div class="avatar-placeholder" id="avatarFallback">⚔️</div>
     </div>
@@ -303,6 +303,20 @@ body{min-height:100vh;font-family:'Crimson Pro',Georgia,serif;font-size:17px;col
       <div id="sideList"></div>
       <div class="empty-quest" id="sideEmpty">No side quests today.</div>
     </div>
+  </div>
+
+  <!-- History -->
+  <div id="historySection" style="margin-bottom:14px;display:none">
+    <div class="panel" style="padding:16px">
+      <div class="section-label">Past Quests</div>
+      <div id="historyList"></div>
+    </div>
+  </div>
+
+  <div style="text-align:center;margin-bottom:14px">
+    <button id="historyBtn" onclick="toggleHistory()" style="background:rgba(255,255,255,0.6);border:1px solid var(--panel-border);border-radius:20px;color:var(--text-light);font-family:'Cinzel',serif;font-size:9px;font-weight:600;letter-spacing:2px;padding:6px 18px;cursor:pointer;transition:all .2s">
+      SHOW HISTORY
+    </button>
   </div>
 
   <div id="addQuestSection">
@@ -438,6 +452,82 @@ function updateEditUI(){
   else{btn.innerHTML='🔒 View Only';btn.className='edit-lock';}
 }
 document.getElementById('gateInput').addEventListener('keydown',e=>{if(e.key==='Enter')checkPassword();});
+
+// ── History ───────────────────────────────
+let historyLoaded = false;
+let historyVisible = false;
+let historyQuests = [];
+
+async function toggleHistory() {
+  historyVisible = !historyVisible;
+  const section = document.getElementById('historySection');
+  const btn = document.getElementById('historyBtn');
+  sfxClick();
+  
+  if (historyVisible) {
+    btn.textContent = 'HIDE HISTORY';
+    section.style.display = 'block';
+    if (!historyLoaded) await loadHistory();
+  } else {
+    btn.textContent = 'SHOW HISTORY';
+    section.style.display = 'none';
+  }
+}
+
+async function loadHistory() {
+  const today = todayStr();
+  setSyncStatus('loading', 'Loading history...');
+  try {
+    const data = await sbFetch(`quests?quest_date=lt.${today}&status=eq.done&order=quest_date.desc,start_time.asc&limit=50`);
+    historyQuests = data || [];
+    historyLoaded = true;
+    renderHistory();
+    setSyncStatus('ok', 'Synced ✦');
+  } catch(e) {
+    setSyncStatus('err', 'Failed to load history');
+  }
+}
+
+function renderHistory() {
+  const list = document.getElementById('historyList');
+  if (historyQuests.length === 0) {
+    list.innerHTML = '<div class="empty-quest">No completed quests yet.</div>';
+    return;
+  }
+
+  // Group by date
+  const grouped = {};
+  historyQuests.forEach(q => {
+    const d = q.quest_date || 'Unknown';
+    if (!grouped[d]) grouped[d] = [];
+    grouped[d].push(q);
+  });
+
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+  list.innerHTML = Object.keys(grouped).sort((a,b) => b.localeCompare(a)).map(date => {
+    const d = new Date(date + 'T00:00:00');
+    const label = `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+    const items = grouped[date].map(q => `
+      <div class="quest-item done" style="margin-bottom:6px;opacity:.5">
+        <div class="quest-top">
+          <div class="qcheck">✓</div>
+          <div class="qname">${q.name}</div>
+          <div class="cleared-badge">Cleared</div>
+        </div>
+        <div class="qmeta">
+          <span class="qcat">${q.category || ''}</span>
+          <span class="qqxp">${q.type === 'main' ? '+100' : '+30'} XP</span>
+        </div>
+      </div>`).join('');
+    return `
+      <div style="margin-bottom:16px">
+        <div style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--text-pale);margin-bottom:8px;text-transform:uppercase">${label}</div>
+        ${items}
+      </div>`;
+  }).join('');
+}
 
 // ── Init ───────────────────────────────────
 async function init() {
