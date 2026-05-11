@@ -424,35 +424,86 @@ body{min-height:100vh;font-family:'Crimson Pro',Georgia,serif;font-size:17px;col
   </div>
 </div>
 
-<!-- Pomodoro Timer -->
-  <div class="pomo-wrap">
-    <div class="panel pomo-panel">
-      <div class="pomo-header">
-        <div class="pomo-title">⏱ Focus Timer</div>
-        <div class="pomo-mode-tabs">
-          <button class="pomo-mode-btn active" onclick="setPomoMode('focus',this)">Focus</button>
-          <button class="pomo-mode-btn" onclick="setPomoMode('short',this)">Short Break</button>
-          <button class="pomo-mode-btn" onclick="setPomoMode('long',this)">Long Break</button>
+<!-- Pomodoro Trigger Button -->
+  <div style="text-align:center;margin-bottom:14px">
+    <button onclick="openPomoModal()" style="
+      background:rgba(255,255,255,0.7);
+      border:1px solid var(--panel-border);
+      color:var(--text-light);
+      border-radius:40px;
+      font-family:'Cinzel',serif;font-size:10px;font-weight:600;
+      letter-spacing:2px;padding:11px 28px;cursor:pointer;
+      transition:all .2s;backdrop-filter:blur(8px);
+    " onmouseover="this.style.background='white';this.style.color='var(--blue-mid)';this.style.borderColor='var(--blue-pale)'"
+       onmouseout="this.style.background='rgba(255,255,255,0.7)';this.style.color='var(--text-light)';this.style.borderColor='var(--panel-border)'">
+      ⏱ START FOCUS
+    </button>
+  </div>
+
+  <!-- Pomodoro Modal -->
+  <div id="pomoModal" style="position:fixed;inset:0;z-index:3000;display:none;align-items:flex-end;justify-content:center;pointer-events:none">
+    <!-- Minimized pill -->
+    <div id="pomoPill" style="display:none;pointer-events:all;margin-bottom:24px;background:rgba(255,255,255,0.95);border:1px solid var(--panel-border);border-radius:40px;padding:8px 20px;box-shadow:0 4px 20px rgba(42,82,152,0.15);backdrop-filter:blur(12px);display:flex;align-items:center;gap:12px;cursor:pointer;animation:slideUp .3s ease" onclick="maximizePomo()">
+      <canvas id="pomoMiniCanvas" width="28" height="28" style="flex-shrink:0"></canvas>
+      <span id="pomoPillTime" style="font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:var(--text-dark);letter-spacing:1px">25:00</span>
+      <span id="pomoPillLabel" style="font-size:12px;color:var(--text-light);font-style:italic">Focus</span>
+      <button onclick="event.stopPropagation();pomoToggle()" style="background:none;border:none;cursor:pointer;font-size:14px;color:var(--text-light);padding:2px 4px" id="pomoPillPlay">▶</button>
+      <button onclick="event.stopPropagation();closePomoModal()" style="background:none;border:none;cursor:pointer;font-size:14px;color:var(--text-pale);padding:2px 4px">✕</button>
+    </div>
+
+    <!-- Full modal -->
+    <div id="pomoFull" style="pointer-events:all;width:100%;max-width:480px;background:rgba(255,255,255,0.97);border-radius:24px 24px 0 0;box-shadow:0 -8px 40px rgba(42,82,152,0.15);backdrop-filter:blur(20px);padding:28px 28px 40px;animation:slideUpFull .4s cubic-bezier(.34,1.2,.64,1)">
+      @keyframes slideUpFull{from{transform:translateY(100%)}to{transform:translateY(0)}}
+      
+      <!-- Handle bar -->
+      <div style="width:36px;height:4px;background:var(--blue-pale);border-radius:2px;margin:0 auto 20px;cursor:pointer" onclick="minimizePomo()"></div>
+      
+      <!-- Header -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+        <div style="font-family:'Cinzel',serif;font-size:10px;font-weight:600;letter-spacing:3px;color:var(--text-light);text-transform:uppercase">Focus Timer</div>
+        <div style="display:flex;gap:4px;background:rgba(180,210,240,0.2);border-radius:20px;padding:3px">
+          <button class="pomo-mode-btn active" id="pmFocus" onclick="setPomoMode('focus',this)">Focus</button>
+          <button class="pomo-mode-btn" id="pmShort" onclick="setPomoMode('short',this)">Short Break</button>
+          <button class="pomo-mode-btn" id="pmLong" onclick="setPomoMode('long',this)">Long Break</button>
         </div>
       </div>
-      <div class="pomo-display">
-        <div class="pomo-ring-wrap">
-          <canvas id="pomoCanvas" width="140" height="140"></canvas>
-          <div class="pomo-time">
-            <div class="pomo-time-text" id="pomoTimeText">25:00</div>
-            <div class="pomo-time-label" id="pomoTimeLabel">Focus</div>
+
+      <!-- Timer ring -->
+      <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:20px">
+        <div style="position:relative;width:200px;height:200px;margin-bottom:12px">
+          <canvas id="pomoCanvas" width="200" height="200" style="position:absolute;top:0;left:0"></canvas>
+          <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+            <div id="pomoTimeText" style="font-family:'Cinzel',serif;font-size:42px;font-weight:700;color:var(--text-dark);letter-spacing:3px;line-height:1">25:00</div>
+            <div id="pomoTimeLabel" style="font-size:13px;color:var(--text-pale);font-style:italic;margin-top:4px">Focus</div>
           </div>
         </div>
-        <div class="pomo-session-dots" id="pomoSessionDots"></div>
-        <div class="pomo-controls">
-          <button class="pomo-btn pomo-btn-secondary" onclick="pomoSkip()" title="Skip">⏭</button>
-          <button class="pomo-btn pomo-btn-main" id="pomoPlayBtn" onclick="pomoToggle()">▶</button>
-          <button class="pomo-btn pomo-btn-secondary" onclick="pomoReset()" title="Reset">↺</button>
+        <!-- Session dots -->
+        <div style="display:flex;gap:8px;margin-bottom:16px" id="pomoSessionDots"></div>
+        <!-- Controls -->
+        <div style="display:flex;gap:12px;align-items:center">
+          <button onclick="pomoSkip()" style="width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.7);border:1px solid var(--panel-border);color:var(--text-light);font-size:14px;cursor:pointer;transition:all .2s" title="Skip">⏭</button>
+          <button id="pomoPlayBtn" onclick="pomoToggle()" style="width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,var(--blue-mid),var(--blue-deep));border:none;color:white;font-size:24px;cursor:pointer;box-shadow:0 4px 16px rgba(42,82,152,0.35);transition:all .2s">▶</button>
+          <button onclick="pomoReset()" style="width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.7);border:1px solid var(--panel-border);color:var(--text-light);font-size:14px;cursor:pointer;transition:all .2s" title="Reset">↺</button>
         </div>
       </div>
-      <div class="pomo-quest-link" id="pomoQuestLink" onclick="linkPomoQuest()">
+
+      <!-- YouTube music -->
+      <div style="margin-bottom:16px">
+        <div style="font-size:11px;color:var(--text-pale);font-style:italic;text-align:center;margin-bottom:8px;letter-spacing:1px">♪ FRIEREN OST</div>
+        <div style="border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(42,82,152,0.1)">
+          <iframe id="pomoYT" width="100%" height="80"
+            src="https://www.youtube.com/embed/u3EBlmzb9ds?si=o79QHOXGBSiy9gdj&start=0&rel=0&modestbranding=1"
+            title="Frieren OST" frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen style="display:block">
+          </iframe>
+        </div>
+      </div>
+
+      <!-- Linked quest -->
+      <div id="pomoQuestLink" onclick="linkPomoQuest()" style="padding:10px 14px;background:rgba(255,255,255,0.6);border:1px solid var(--panel-border);border-radius:10px;font-size:13px;color:var(--text-light);display:flex;align-items:center;gap:8px;cursor:pointer;transition:all .2s">
         <span>🎯</span>
-        <span class="ql-name" id="pomoQuestName">Link to a quest...</span>
+        <span id="pomoQuestName" style="flex:1;font-style:italic;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Link to a quest...</span>
         <span style="font-size:11px;color:var(--text-pale)">›</span>
       </div>
     </div>
@@ -1272,10 +1323,12 @@ function pomoToggle() {
     pomoRunning = false;
     clearInterval(pomoTimer);
     document.getElementById('pomoPlayBtn').textContent = '▶';
+    document.getElementById('pomoPillPlay').textContent = '▶';
     sfxClick();
   } else {
     pomoRunning = true;
     document.getElementById('pomoPlayBtn').textContent = '⏸';
+    document.getElementById('pomoPillPlay').textContent = '⏸';
     sfxClick();
     pomoTimer = setInterval(() => {
       pomoSecondsLeft--;
@@ -1294,6 +1347,7 @@ function pomoReset() {
   pomoSecondsLeft = POMO_MODES[pomoMode].minutes * 60;
   pomoTotalSeconds = pomoSecondsLeft;
   document.getElementById('pomoPlayBtn').textContent = '▶';
+  document.getElementById('pomoPillPlay').textContent = '▶';
   updatePomoDisplay();
   drawPomoRing(1);
   sfxClick();
@@ -1351,8 +1405,10 @@ function setPomoModeAuto(mode) {
 function updatePomoDisplay() {
   const m = Math.floor(pomoSecondsLeft / 60);
   const s = pomoSecondsLeft % 60;
-  document.getElementById('pomoTimeText').textContent =
-    m.toString().padStart(2,'0') + ':' + s.toString().padStart(2,'0');
+  const timeStr = m.toString().padStart(2,'0') + ':' + s.toString().padStart(2,'0');
+  document.getElementById('pomoTimeText').textContent = timeStr;
+  document.getElementById('pomoPillTime').textContent = timeStr;
+  document.getElementById('pomoPillLabel').textContent = POMO_MODES[pomoMode].label;
 }
 
 function updatePomoSessionDots() {
@@ -1367,42 +1423,27 @@ function drawPomoRing(progress) {
   const canvas = document.getElementById('pomoCanvas');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
-  const cx = 70, cy = 70, r = 58;
-  ctx.clearRect(0,0,140,140);
+  const cx = 100, cy = 100, r = 85;
+  ctx.clearRect(0,0,200,200);
 
   // Background ring
-  ctx.beginPath();
-  ctx.arc(cx, cy, r, 0, Math.PI*2);
-  ctx.strokeStyle = 'rgba(180,210,240,0.3)';
-  ctx.lineWidth = 6;
-  ctx.stroke();
+  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
+  ctx.strokeStyle='rgba(180,210,240,0.25)';ctx.lineWidth=8;ctx.stroke();
 
   // Progress ring
-  if (progress > 0) {
-    const color = POMO_MODES[pomoMode].color;
-    const start = -Math.PI/2;
-    const end = start + (Math.PI*2 * progress);
-    ctx.beginPath();
-    ctx.arc(cx, cy, r, start, end);
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 6;
-    ctx.lineCap = 'round';
-    ctx.shadowColor = color;
-    ctx.shadowBlur = 8;
-    ctx.stroke();
-    ctx.shadowBlur = 0;
-
-    // Moving dot at tip
-    const dotX = cx + r * Math.cos(end);
-    const dotY = cy + r * Math.sin(end);
-    ctx.beginPath();
-    ctx.arc(dotX, dotY, 5, 0, Math.PI*2);
-    ctx.fillStyle = color;
-    ctx.shadowColor = color;
-    ctx.shadowBlur = 10;
-    ctx.fill();
-    ctx.shadowBlur = 0;
+  if(progress>0){
+    const color=POMO_MODES[pomoMode].color;
+    const start=-Math.PI/2;
+    const end=start+(Math.PI*2*progress);
+    ctx.beginPath();ctx.arc(cx,cy,r,start,end);
+    ctx.strokeStyle=color;ctx.lineWidth=8;ctx.lineCap='round';
+    ctx.shadowColor=color;ctx.shadowBlur=12;ctx.stroke();ctx.shadowBlur=0;
+    const dotX=cx+r*Math.cos(end);
+    const dotY=cy+r*Math.sin(end);
+    ctx.beginPath();ctx.arc(dotX,dotY,6,0,Math.PI*2);
+    ctx.fillStyle=color;ctx.shadowColor=color;ctx.shadowBlur=14;ctx.fill();ctx.shadowBlur=0;
   }
+  drawPomoMiniRing(progress);
 }
 
 function linkPomoQuest() {
@@ -1424,11 +1465,63 @@ function linkPomoQuest() {
   link.classList.add('linked');
 }
 
-function initPomo() {
+let pomoMinimized = false;
+
+function openPomoModal() {
+  sfxClick();
+  const modal = document.getElementById('pomoModal');
+  modal.style.display = 'flex';
+  modal.style.pointerEvents = 'all';
+  document.getElementById('pomoFull').style.display = 'block';
+  document.getElementById('pomoPill').style.display = 'none';
+  pomoMinimized = false;
   drawPomoRing(1);
   updatePomoSessionDots();
   updatePomoDisplay();
-  // Request notification permission
+}
+
+function closePomoModal() {
+  sfxClick();
+  clearInterval(pomoTimer);
+  pomoRunning = false;
+  document.getElementById('pomoPlayBtn').textContent = '▶';
+  document.getElementById('pomoPillPlay').textContent = '▶';
+  document.getElementById('pomoModal').style.display = 'none';
+  document.getElementById('pomoModal').style.pointerEvents = 'none';
+  document.getElementById('pomoPill').style.display = 'none';
+}
+
+function minimizePomo() {
+  sfxClick();
+  pomoMinimized = true;
+  document.getElementById('pomoFull').style.display = 'none';
+  const pill = document.getElementById('pomoPill');
+  pill.style.display = 'flex';
+}
+
+function maximizePomo() {
+  sfxClick();
+  pomoMinimized = false;
+  document.getElementById('pomoFull').style.display = 'block';
+  document.getElementById('pomoPill').style.display = 'none';
+}
+
+function drawPomoMiniRing(progress) {
+  const canvas = document.getElementById('pomoMiniCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const cx = 14, cy = 14, r = 11;
+  ctx.clearRect(0,0,28,28);
+  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
+  ctx.strokeStyle='rgba(180,210,240,0.4)';ctx.lineWidth=3;ctx.stroke();
+  if(progress>0){
+    const color=POMO_MODES[pomoMode].color;
+    ctx.beginPath();ctx.arc(cx,cy,r,-Math.PI/2,-Math.PI/2+Math.PI*2*progress);
+    ctx.strokeStyle=color;ctx.lineWidth=3;ctx.lineCap='round';ctx.stroke();
+  }
+}
+
+function initPomo() {
   if (Notification.permission === 'default') {
     Notification.requestPermission();
   }
