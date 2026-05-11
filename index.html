@@ -232,7 +232,7 @@ body{min-height:100vh;font-family:'Crimson Pro',Georgia,serif;font-size:17px;col
   </div>
 </div>
 
-<button id="addFab" onclick="scrollToAdd()">+</button>
+<button id="addFab" onclick="openNewQuestModal()">+</button>
 
 <div class="container">
   <div class="header">
@@ -259,8 +259,19 @@ body{min-height:100vh;font-family:'Crimson Pro',Georgia,serif;font-size:17px;col
       <div class="avatar-placeholder" id="avatarFallback">⚔️</div>
     </div>
     <div class="player-info">
-      <div class="player-name">OZI</div>
-      <div class="player-class">On a journey to become better, every day</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px">
+        <div class="player-name">OZI</div>
+        <button onclick="openNewQuestModal()" style="
+          background:linear-gradient(135deg,var(--blue-mid),var(--blue-deep));
+          color:white;border:none;border-radius:20px;
+          font-family:'Cinzel',serif;font-size:8px;font-weight:600;
+          letter-spacing:1px;padding:5px 14px;cursor:pointer;
+          box-shadow:0 2px 10px rgba(42,82,152,0.3);
+          transition:all .2s;white-space:nowrap;flex-shrink:0;
+        " onmouseover="this.style.transform='translateY(-1px)'"
+           onmouseout="this.style.transform='translateY(0)'">✦ NEW QUEST</button>
+      </div>
+      <div class="player-class" id="dailyQuote">On a journey to become better, every day</div>
       <div class="level-row">
         <div class="level-badge" id="lvlBadge">LEVEL 1</div>
         <div class="xp-bar-wrap">
@@ -319,35 +330,68 @@ body{min-height:100vh;font-family:'Crimson Pro',Georgia,serif;font-size:17px;col
     </button>
   </div>
 
-  <div id="addQuestSection">
-    <div class="panel add-quest-panel">
-      <div class="section-label">Accept New Quest</div>
-      <div class="add-quest-form">
-        <div class="add-form-row">
-          <input class="qi name" id="qName" placeholder="Describe your quest..." autocomplete="off"/>
+  <!-- New Quest Modal -->
+  <div id="newQuestModal" style="position:fixed;inset:0;z-index:8000;display:none;align-items:center;justify-content:center;background:rgba(42,82,152,0.15);backdrop-filter:blur(8px)">
+    <div style="background:rgba(255,255,255,0.98);border:1px solid rgba(196,154,60,0.25);border-radius:20px;padding:28px;width:90%;max-width:520px;box-shadow:0 12px 48px rgba(42,82,152,0.15);position:relative;animation:slideUp .3s cubic-bezier(.34,1.56,.64,1)">
+      <button onclick="closeNewQuestModal()" style="position:absolute;top:14px;right:16px;background:none;border:none;font-size:18px;color:var(--text-pale);cursor:pointer">✕</button>
+      <div style="font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:var(--text-dark);letter-spacing:2px;margin-bottom:3px">New Quest</div>
+      <div style="font-size:13px;color:var(--text-light);font-style:italic;margin-bottom:20px" id="nqDateLabel">Today</div>
+      
+      <!-- Quest name -->
+      <div style="margin-bottom:12px">
+        <input class="qi" id="nqName" placeholder="Describe your quest..." autocomplete="off" style="width:100%"/>
+      </div>
+
+      <!-- Type tabs -->
+      <div style="display:flex;gap:6px;margin-bottom:12px">
+        <button id="nqTypeMain" onclick="setNqType('main')" style="flex:1;padding:8px;border-radius:8px;border:2px solid var(--gold);background:rgba(196,154,60,0.1);color:var(--gold);font-family:'Cinzel',serif;font-size:9px;font-weight:700;letter-spacing:1px;cursor:pointer">⚔ MAIN QUEST</button>
+        <button id="nqTypeSide" onclick="setNqType('side')" style="flex:1;padding:8px;border-radius:8px;border:1px solid var(--panel-border);background:transparent;color:var(--text-light);font-family:'Cinzel',serif;font-size:9px;font-weight:700;letter-spacing:1px;cursor:pointer">◎ SIDE QUEST</button>
+      </div>
+
+      <!-- Category & Size -->
+      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+        <select class="qs" id="nqCat" onchange="handleNqCat()" style="flex:1;min-width:120px">
+          <option>Review</option><option>Research</option><option>Create</option>
+          <option>Edit</option><option>Meeting</option><option>Action</option>
+          <option value="Others">Others...</option>
+        </select>
+        <div id="nqOthersWrap" style="display:none;flex:1">
+          <input class="qi" id="nqOthersInput" placeholder="Category..." style="width:100%"/>
         </div>
-        <div class="add-form-row">
-          <select class="qs" id="qCat" onchange="handleCat()">
-            <option>Review</option><option>Research</option><option>Create</option>
-            <option>Edit</option><option>Meeting</option><option>Action</option>
-            <option value="Others">Others...</option>
-          </select>
-          <div class="others-wrap" id="qOthersWrap">
-            <input class="qi others-inp" id="qOthersInput" placeholder="Category..."/>
+        <select class="qs" id="nqSize">
+          <option value="quick">⚡ Quick</option>
+          <option value="deep">🔥 Deep Work</option>
+        </select>
+      </div>
+
+      <!-- Time & Deadline -->
+      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+        <input class="qi" id="nqTime" type="time" style="width:110px;flex-shrink:0"/>
+        <input class="qi" id="nqDl" type="datetime-local" style="flex:1;min-width:140px"/>
+      </div>
+
+      <!-- Recurring -->
+      <div style="margin-bottom:16px">
+        <select class="qs" id="nqFreq" onchange="handleNqFreq()" style="width:100%">
+          <option value="once">Does not repeat</option>
+          <option value="daily">Every day</option>
+          <option value="weekday">Every weekday (Mon–Fri)</option>
+          <option value="weekly">Every week on selected days</option>
+          <option value="biweekly">Every 2 weeks on selected days</option>
+          <option value="custom">Custom...</option>
+        </select>
+        <div id="nqDaysWrap" style="display:none;margin-top:10px">
+          <div style="font-size:12px;color:var(--text-light);margin-bottom:6px;font-style:italic">Repeat on:</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <button onclick="toggleDay(0)" id="nqDay0" style="width:38px;height:38px;border-radius:50%;border:2px solid var(--blue-pale);background:white;color:var(--blue-mid);font-family:'Cinzel',serif;font-size:8px;font-weight:700;cursor:pointer;transition:all .3s;flex-shrink:0;position:relative;overflow:hidden">Mo</button><button onclick="toggleDay(1)" id="nqDay1" style="width:38px;height:38px;border-radius:50%;border:2px solid var(--blue-pale);background:white;color:var(--blue-mid);font-family:'Cinzel',serif;font-size:8px;font-weight:700;cursor:pointer;transition:all .3s;flex-shrink:0;position:relative;overflow:hidden">Tu</button><button onclick="toggleDay(2)" id="nqDay2" style="width:38px;height:38px;border-radius:50%;border:2px solid var(--blue-pale);background:white;color:var(--blue-mid);font-family:'Cinzel',serif;font-size:8px;font-weight:700;cursor:pointer;transition:all .3s;flex-shrink:0;position:relative;overflow:hidden">We</button><button onclick="toggleDay(3)" id="nqDay3" style="width:38px;height:38px;border-radius:50%;border:2px solid var(--blue-pale);background:white;color:var(--blue-mid);font-family:'Cinzel',serif;font-size:8px;font-weight:700;cursor:pointer;transition:all .3s;flex-shrink:0;position:relative;overflow:hidden">Th</button><button onclick="toggleDay(4)" id="nqDay4" style="width:38px;height:38px;border-radius:50%;border:2px solid var(--blue-pale);background:white;color:var(--blue-mid);font-family:'Cinzel',serif;font-size:8px;font-weight:700;cursor:pointer;transition:all .3s;flex-shrink:0;position:relative;overflow:hidden">Fr</button><button onclick="toggleDay(5)" id="nqDay5" style="width:38px;height:38px;border-radius:50%;border:2px solid var(--blue-pale);background:white;color:var(--blue-mid);font-family:'Cinzel',serif;font-size:8px;font-weight:700;cursor:pointer;transition:all .3s;flex-shrink:0;position:relative;overflow:hidden">Sa</button><button onclick="toggleDay(6)" id="nqDay6" style="width:38px;height:38px;border-radius:50%;border:2px solid var(--blue-pale);background:white;color:var(--blue-mid);font-family:'Cinzel',serif;font-size:8px;font-weight:700;cursor:pointer;transition:all .3s;flex-shrink:0;position:relative;overflow:hidden">Su</button>
           </div>
-          <select class="qs" id="qSize">
-            <option value="quick">⚡ Quick</option>
-            <option value="deep">🔥 Deep Work</option>
-          </select>
         </div>
-        <div class="add-form-row">
-          <input class="qi time-inp" id="qTime" type="time"/>
-          <input class="qi dl-inp" id="qDl" type="datetime-local"/>
-        </div>
-        <div class="add-btn-row">
-          <button class="add-main-btn" onclick="addQuest('main')">⚔ Add Main Quest</button>
-          <button class="add-side-btn" onclick="addQuest('side')">◎ Add Side Quest</button>
-        </div>
+      </div>
+
+      <!-- Submit -->
+      <div style="display:flex;gap:8px">
+        <button onclick="submitNewQuest('main')" id="nqSubmitMain" style="flex:1;background:linear-gradient(135deg,var(--gold),#a07828);color:#fff;border:none;border-radius:8px;font-family:'Cinzel',serif;font-size:9px;font-weight:600;letter-spacing:1px;padding:12px;cursor:pointer;transition:all .2s">⚔ Add Main Quest</button>
+        <button onclick="submitNewQuest('side')" id="nqSubmitSide" style="flex:1;background:linear-gradient(135deg,var(--blue-mid),var(--blue-deep));color:#fff;border:none;border-radius:8px;font-family:'Cinzel',serif;font-size:9px;font-weight:600;letter-spacing:1px;padding:12px;cursor:pointer;transition:all .2s">◎ Add Side Quest</button>
       </div>
     </div>
   </div>
@@ -529,13 +573,248 @@ function renderHistory() {
   }).join('');
 }
 
+// ── New Quest Modal ────────────────────────
+let nqType = 'main';
+let selectedDays = [];
+
+function openNewQuestModal(dateStr) {
+  sfxClick();
+  requireAuth(() => {
+    const d = dateStr || todayStr();
+    const dt = new Date(d + 'T00:00:00');
+    const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    document.getElementById('nqDateLabel').textContent =
+      d === todayStr() ? 'Today' : `${days[dt.getDay()]}, ${dt.getDate()} ${months[dt.getMonth()]} ${dt.getFullYear()}`;
+    document.getElementById('nqName').dataset.forDate = d;
+    document.getElementById('nqName').value = '';
+    document.getElementById('nqTime').value = '';
+    document.getElementById('nqDl').value = '';
+    document.getElementById('nqFreq').value = 'once';
+    document.getElementById('nqDaysWrap').style.display = 'none';
+    selectedDays = [];
+    setNqType('main');
+    document.getElementById('newQuestModal').style.display = 'flex';
+    setTimeout(() => document.getElementById('nqName').focus(), 100);
+  });
+}
+
+function closeNewQuestModal() {
+  document.getElementById('newQuestModal').style.display = 'none';
+  sfxClick();
+}
+
+function setNqType(type) {
+  nqType = type;
+  const main = document.getElementById('nqTypeMain');
+  const side = document.getElementById('nqTypeSide');
+  if (type === 'main') {
+    main.style.cssText += ';border:2px solid var(--gold);background:rgba(196,154,60,0.1);color:var(--gold)';
+    side.style.cssText += ';border:1px solid var(--panel-border);background:transparent;color:var(--text-light)';
+  } else {
+    side.style.cssText += ';border:2px solid var(--blue-mid);background:rgba(74,127,212,0.1);color:var(--blue-mid)';
+    main.style.cssText += ';border:1px solid var(--panel-border);background:transparent;color:var(--text-light)';
+  }
+}
+
+function handleNqCat() {
+  const v = document.getElementById('nqCat').value;
+  document.getElementById('nqOthersWrap').style.display = v === 'Others' ? 'flex' : 'none';
+}
+
+function handleNqFreq() {
+  const v = document.getElementById('nqFreq').value;
+  const wrap = document.getElementById('nqDaysWrap');
+  const showDays = v === 'weekly' || v === 'biweekly' || v === 'custom';
+  wrap.style.display = showDays ? 'block' : 'none';
+  if (showDays) {
+    const labels = {
+      weekly: 'Repeat on:',
+      biweekly: 'Repeat every 2 weeks on:',
+      custom: 'Repeat on:'
+    };
+    wrap.querySelector('div[style*="font-size:12px"]').textContent = labels[v] || 'Repeat on:';
+  }
+  selectedDays = [];
+  for (let i = 0; i < 7; i++) {
+    const btn = document.getElementById('nqDay' + i);
+    if (btn) btn.classList.remove('nq-day-active');
+  }
+}
+
+function toggleDay(i) {
+  const btn = document.getElementById('nqDay' + i);
+  if (selectedDays.includes(i)) {
+    selectedDays = selectedDays.filter(d => d !== i);
+    btn.classList.remove('nq-day-active');
+  } else {
+    selectedDays.push(i);
+    btn.classList.add('nq-day-active');
+  }
+  sfxClick();
+}
+
+function getNqCat() {
+  const v = document.getElementById('nqCat').value;
+  if (v === 'Others') return document.getElementById('nqOthersInput').value.trim() || 'Others';
+  return v;
+}
+
+async function submitNewQuest(type) {
+  const name = document.getElementById('nqName').value.trim();
+  if (!name) return;
+  sfxClick();
+
+  const freq = document.getElementById('nqFreq').value;
+  const forDate = document.getElementById('nqName').dataset.forDate || todayStr();
+  const baseQuest = {
+    name, type,
+    category: getNqCat(),
+    size: document.getElementById('nqSize').value,
+    start_time: document.getElementById('nqTime').value || null,
+    deadline: document.getElementById('nqDl').value || null,
+    status: 'todo',
+  };
+
+  closeNewQuestModal();
+  setSyncStatus('loading', 'Saving...');
+
+  try {
+    if (freq === 'once') {
+      // One-time quest
+      const res = await sbFetch('quests', 'POST', { ...baseQuest, quest_date: forDate });
+      const saved = Array.isArray(res) ? res[0] : res;
+      if (saved && (saved.quest_date === todayStr() || !saved.quest_date)) {
+        quests.push(saved);
+      }
+    } else {
+      // Recurring quest — save template
+      let days = [];
+      if (freq === 'daily') days = [0,1,2,3,4,5,6];
+      else if (freq === 'weekday') days = [1,2,3,4,5];
+      else if (freq === 'weekly' || freq === 'biweekly' || freq === 'custom') days = selectedDays;
+
+      await sbFetch('recurring_quests', 'POST', {
+        name: baseQuest.name,
+        type: baseQuest.type,
+        category: baseQuest.category,
+        size: baseQuest.size,
+        start_time: baseQuest.start_time,
+        frequency: freq,
+        days_of_week: days
+      });
+
+      // Also add for today if today matches
+      const todayDow = new Date().getDay(); // 0=Sun
+      // Convert: our buttons are Mon=0...Sun=6, JS is Sun=0...Sat=6
+      const todayBtn = todayDow === 0 ? 6 : todayDow - 1;
+      if (days.includes(todayBtn)) {
+        const res = await sbFetch('quests', 'POST', { ...baseQuest, quest_date: todayStr() });
+        const saved = Array.isArray(res) ? res[0] : res;
+        if (saved) quests.push(saved);
+      }
+    }
+
+    sfxAccepted();
+    calCache = {};
+    setSyncStatus('ok', 'Synced ✦');
+    render();
+    renderCalendar();
+
+    // Show added animation on newest quest
+    setTimeout(() => {
+      const lists = ['mainList', 'sideList'];
+      lists.forEach(id => {
+        const last = document.getElementById(id)?.lastElementChild;
+        if (last) last.classList.add('new-quest');
+      });
+    }, 100);
+
+  } catch(e) {
+    setSyncStatus('err', 'Save failed');
+    console.error(e);
+  }
+}
+
+// ── Daily Quotes ──────────────────────────
+const QUOTES = [
+  "Small steps every day lead to big changes over time.",
+  "You don't have to be great to start, but you have to start to be great.",
+  "Growth is never by mere chance; it is the result of forces working together.",
+  "Be the person you needed when you were younger.",
+  "Every day is a chance to be better than yesterday.",
+  "Discipline is choosing between what you want now and what you want most.",
+  "The only bad workout is the one that didn't happen.",
+  "You are allowed to be both a masterpiece and a work in progress.",
+  "Invest in yourself. It pays the best interest.",
+  "Becoming is better than being.",
+  "Don't wait for the perfect moment. Take the moment and make it perfect.",
+  "Progress, not perfection.",
+  "The goal is not to be better than others, but to be better than you used to be.",
+  "Hard days are the best because that's when champions are made.",
+  "Your future self is watching you right now through your memories.",
+  "Do something today that your future self will thank you for.",
+  "A little progress each day adds up to big results.",
+  "The secret of getting ahead is getting started.",
+  "You are capable of more than you know.",
+  "Consistency is what transforms average into excellence.",
+  "Believe in yourself and all that you are.",
+  "Make today so awesome that yesterday gets jealous.",
+  "Your only limit is your mind.",
+  "Work hard in silence, let your success be the noise.",
+  "Push yourself because no one else is going to do it for you.",
+  "Great things never come from comfort zones.",
+  "Dream it. Believe it. Build it.",
+  "The harder you work for something, the greater you'll feel when you achieve it.",
+  "Wake up with determination. Go to bed with satisfaction.",
+  "One day or day one. You decide."
+];
+
+function setDailyQuote() {
+  const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
+  const idx = dayOfYear % QUOTES.length;
+  const el = document.getElementById('dailyQuote');
+  if (el) el.textContent = '"' + QUOTES[idx] + '"';
+}
+
+// ── Enhanced Motes ─────────────────────────
+function initMotes(){
+  const w=document.getElementById('motes');
+  // More motes, more visible
+  for(let i=0;i<28;i++){
+    const m=document.createElement('div');m.className='mote';
+    const sz=2+Math.random()*6;
+    m.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%`;
+    m.style.setProperty('--dur',(5+Math.random()*9)+'s');
+    m.style.setProperty('--op',(0.5+Math.random()*0.5).toFixed(2));
+    m.style.setProperty('--ty',-(80+Math.random()*140)+'px');
+    m.style.setProperty('--tx',(Math.random()-.5)*80+'px');
+    m.style.animationDelay=(Math.random()*8)+'s';
+    w.appendChild(m);
+  }
+  // Add cloud wisps
+  for(let i=0;i<6;i++){
+    const c=document.createElement('div');
+    c.style.cssText=`position:absolute;border-radius:50px;background:rgba(255,255,255,0.45);filter:blur(10px);width:${100+Math.random()*200}px;height:${16+Math.random()*24}px;top:${Math.random()*220}px`;
+    c.style.animation=`cloudDrift ${28+Math.random()*40}s linear infinite`;
+    c.style.animationDelay=`${Math.random()*35}s`;
+    w.appendChild(c);
+  }
+}
+
 // ── Init ───────────────────────────────────
 async function init() {
   setSyncStatus('loading', 'Loading quests...');
   try {
     const today = todayStr();
+    
+    // Load today quests
     const data = await sbFetch(`quests?quest_date=eq.${today}&order=start_time.asc`);
     quests = data || [];
+
+    // Load & apply recurring quests
+    await applyRecurringQuests(today);
+
     const xpData = await sbFetch('player_xp?id=eq.1');
     if (xpData && xpData.length) playerXp = xpData[0];
     setSyncStatus('ok', 'Synced ✦');
@@ -544,6 +823,38 @@ async function init() {
   } catch(e) {
     setSyncStatus('err', 'Connection failed: ' + e.message);
     console.error(e);
+  }
+}
+
+async function applyRecurringQuests(today) {
+  try {
+    const recurring = await sbFetch('recurring_quests?order=id.asc');
+    if (!recurring || !recurring.length) return;
+
+    const todayDow = new Date().getDay();
+    const todayBtn = todayDow === 0 ? 6 : todayDow - 1;
+    const existingNames = new Set(quests.map(q => q.name));
+
+    for (const r of recurring) {
+      const days = r.days_of_week || [];
+      if (!days.includes(todayBtn)) continue;
+      if (existingNames.has(r.name)) continue;
+
+      // Add recurring quest for today
+      const res = await sbFetch('quests', 'POST', {
+        name: r.name,
+        type: r.type,
+        category: r.category,
+        size: r.size,
+        start_time: r.start_time,
+        status: 'todo',
+        quest_date: today
+      });
+      const saved = Array.isArray(res) ? res[0] : res;
+      if (saved) quests.push(saved);
+    }
+  } catch(e) {
+    console.error('Recurring quests error:', e);
   }
 }
 
@@ -598,9 +909,7 @@ function addQuest(type) {
 }
 
 function scrollToAdd(){
-  sfxClick();
-  document.getElementById('addQuestSection').scrollIntoView({behavior:'smooth',block:'center'});
-  setTimeout(()=>document.getElementById('qName').focus(),400);
+  openNewQuestModal();
 }
 
 // ── Cycle Status ───────────────────────────
@@ -832,22 +1141,14 @@ async function renderMonth(){
 }
 
 function setDateAndScroll(ds){
-  sfxClick();
-  requireAuth(()=>{
-    document.getElementById('qName').dataset.forDate=ds;
-    document.getElementById('addQuestSection').scrollIntoView({behavior:'smooth',block:'center'});
-    setTimeout(()=>document.getElementById('qName').focus(),400);
-  });
+  openNewQuestModal(ds);
 }
 
 function setDateAndScrollHour(ds,h){
-  sfxClick();
-  requireAuth(()=>{
-    document.getElementById('qName').dataset.forDate=ds;
-    document.getElementById('qTime').value=h.toString().padStart(2,'0')+':00';
-    document.getElementById('addQuestSection').scrollIntoView({behavior:'smooth',block:'center'});
-    setTimeout(()=>document.getElementById('qName').focus(),400);
-  });
+  openNewQuestModal(ds);
+  setTimeout(()=>{
+    document.getElementById('nqTime').value=h.toString().padStart(2,'0')+':00';
+  },150);
 }
 
 // ── Completion FX ──────────────────────────
@@ -875,21 +1176,7 @@ function showCompletion(xp,el){
   setTimeout(()=>{pc.innerHTML='';b.className='cbanner';},2600);
 }
 
-// ── Motes ──────────────────────────────────
-function initMotes(){
-  const w=document.getElementById('motes');
-  for(let i=0;i<14;i++){
-    const m=document.createElement('div');m.className='mote';
-    const sz=2+Math.random()*4;
-    m.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%`;
-    m.style.setProperty('--dur',(6+Math.random()*10)+'s');
-    m.style.setProperty('--op',(0.4+Math.random()*0.5).toFixed(2));
-    m.style.setProperty('--ty',-(60+Math.random()*100)+'px');
-    m.style.setProperty('--tx',(Math.random()-.5)*60+'px');
-    m.style.animationDelay=(Math.random()*10)+'s';
-    w.appendChild(m);
-  }
-}
+
 
 function updateDate(){
   const d=new Date();
@@ -898,11 +1185,17 @@ function updateDate(){
   document.getElementById('dateDisplay').innerHTML=`${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}<br><span style="font-size:10px">${d.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})}</span>`;
 }
 
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.getElementById('passwordGate').style.display==='flex')closeGate(false);});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    if(document.getElementById('passwordGate').style.display==='flex')closeGate(false);
+    if(document.getElementById('newQuestModal').style.display==='flex')closeNewQuestModal();
+  }
+  if(e.key==='Enter'&&document.activeElement.id==='nqName')submitNewQuest(nqType);
+});
 setInterval(updateDate,1000);
 setInterval(()=>renderCalendar(),120000);
 
-initMotes();updateDate();updateEditUI();init();
+initMotes();updateDate();updateEditUI();setDailyQuote();init();
 </script>
 </body>
 </html>
