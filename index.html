@@ -1767,6 +1767,18 @@ function makeItem(q){
     </div>`;
   div.addEventListener('click',()=>cycleStatus(q.id,div));
   div.addEventListener('contextmenu',e=>showContextMenu(e,q.id));
+
+  // Long press for mobile
+  let pressTimer;
+  div.addEventListener('touchstart', e => {
+    pressTimer = setTimeout(() => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      showContextMenu({ clientX: touch.clientX, clientY: touch.clientY, preventDefault: ()=>{} }, q.id);
+    }, 500);
+  }, { passive: true });
+  div.addEventListener('touchend', () => clearTimeout(pressTimer));
+  div.addEventListener('touchmove', () => clearTimeout(pressTimer));
   return div;
 }
 
