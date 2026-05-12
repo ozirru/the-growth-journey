@@ -231,7 +231,7 @@ body{min-height:100vh;font-family:'Crimson Pro',Georgia,serif;font-size:17px;col
 .slides-track{display:block}
 .slide{display:none;min-height:100vh}
 .slide.active{display:block}
-.slide-page{padding:24px 16px 100px;max-width:820px;margin:0 auto}
+.slide-page{padding:24px 16px 60px;max-width:820px;margin:0 auto}
 
 /* Dot indicators */
 .slide-dots{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:200;background:rgba(255,255,255,0.6);border:1px solid var(--panel-border);border-radius:20px;padding:6px 12px;backdrop-filter:blur(8px)}
@@ -318,7 +318,7 @@ body{min-height:100vh;font-family:'Crimson Pro',Georgia,serif;font-size:17px;col
   <button class="slide-dot" onclick="goToSlide(1)"></button>
   <button class="slide-dot" onclick="goToSlide(2)"></button>
 </div>
-<div class="app-slides"><div class="slides-track" id="slidesTrack"><div class="slide active" id="slide0"><div class="container" style="padding-bottom:100px">
+<div class="app-slides"><div class="slides-track" id="slidesTrack"><div class="slide active" id="slide0"><div class="container" style="padding-bottom:60px">
   <div class="header">
     <div class="date-display" id="dateDisplay"></div>
     <div class="header-ornament">✦ Hero's Record ✦</div>
@@ -679,29 +679,28 @@ body{min-height:100vh;font-family:'Crimson Pro',Georgia,serif;font-size:17px;col
 
 <!-- Slide 3: Words of Strength -->
 <div class="slide" id="slide2" style="background:linear-gradient(175deg,#a8c8f0 0%,#c0d8f5 18%,#d8ecff 38%,#e8f4ff 55%,#f4f9ff 72%,#fff 100%)">
-  <div class="slide-page">
-  <div style="min-height:80vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 0">
-    <div style="text-align:center;margin-bottom:28px">
-      <div style="font-size:10px;letter-spacing:6px;color:var(--gold);text-transform:uppercase;margin-bottom:6px;opacity:.8">✦ Keep Going ✦</div>
-      <div class="words-title">Words of Strength</div>
-      <div class="words-sub">Tap a word to feature it. Add your own.</div>
+  <div class="slide-page" style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">
+    
+    <div style="font-size:10px;letter-spacing:6px;color:var(--gold);text-transform:uppercase;margin-bottom:32px;opacity:.8">✦ Keep Going ✦</div>
+    
+    <!-- Featured rotating quote -->
+    <div id="strengthQuote" style="max-width:480px;padding:0 16px;margin-bottom:48px;animation:fadeUp .6s ease">
+      <div id="strengthText" style="font-family:'Cinzel',serif;font-size:18px;font-weight:600;color:var(--text-dark);line-height:1.8;letter-spacing:0.5px;margin-bottom:16px"></div>
+      <div style="width:40px;height:2px;background:var(--gold);margin:0 auto 16px;border-radius:1px"></div>
+      <div id="strengthAuthor" style="font-size:13px;color:var(--text-pale);font-style:italic"></div>
     </div>
-    <div class="featured-word" id="featuredWord" style="text-align:center;max-width:480px;width:90%;margin:0 auto 32px;padding:28px 24px;background:var(--panel-bg);border:1px solid rgba(196,154,60,0.2);border-radius:20px;box-shadow:var(--shadow);backdrop-filter:blur(12px)">
-      <div id="featuredQuoteText" style="font-family:'Cinzel',serif;font-size:14px;font-weight:600;color:var(--text-dark);line-height:1.8;letter-spacing:0.5px;margin-bottom:10px">&#8220;You are capable of more than you know.&#8221;</div>
-      <div id="featuredAuthorText" style="font-size:13px;color:var(--text-pale);font-style:italic">— Your future self</div>
-    </div>
-    <div id="wordsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;width:100%;max-width:640px;margin-bottom:20px"></div>
-    <div style="width:100%;max-width:480px">
-      <div id="wordsAddForm" style="display:none;margin-bottom:10px">
+
+    <!-- Add custom word -->
+    <div style="width:100%;max-width:400px">
+      <div id="strengthAddForm" style="display:none;margin-bottom:10px">
         <div class="bucket-input-row">
-          <input class="bucket-input" id="wordTextField" placeholder="Your words of strength..." autocomplete="off" style="font-style:italic"/>
+          <input class="bucket-input" id="wordTextField" placeholder="Your words of strength..." autocomplete="off" style="font-style:italic;text-align:center"/>
           <button class="bucket-submit" onclick="addWord()">Add</button>
         </div>
       </div>
       <button class="words-add-btn" onclick="toggleWordsAdd()">✦ ADD YOUR OWN WORDS</button>
     </div>
-  </div>
-</div></div><!-- end slide2 -->
+  </div></div><!-- end slide2 -->
 
 </div></div><!-- end slides-track + app-slides -->
 
@@ -1933,7 +1932,9 @@ function goToSlide(idx) {
   // Hide all slides, show target
   document.querySelectorAll('.slide').forEach((s,i) => {
     s.classList.toggle('active', i === idx);
+    if (i === idx) s.scrollTop = 0; // Reset scroll position
   });
+  window.scrollTo(0, 0);
   document.querySelectorAll('.slide-dot').forEach((d,i) => {
     d.classList.toggle('active', i === idx);
   });
@@ -2088,62 +2089,63 @@ const DEFAULT_WORDS = [
   { text: "The harder you work, the greater you feel when you achieve it.", author: "" },
   { text: "Believe in yourself and all that you are.", author: "" },
   { text: "You have survived every hard day so far.", author: "" },
+  { text: "Do something today that your future self will thank you for.", author: "" },
+  { text: "One day or day one. You decide.", author: "" },
+  { text: "Consistency is what transforms average into excellence.", author: "" },
+  { text: "The goal is not to be better than others, but to be better than you used to be.", author: "" },
 ];
 
 let customWords = [];
-let featuredWordIdx = 0;
+let strengthTimer = null;
+let currentWordIdx = 0;
 
 async function loadWords() {
   try {
     const data = await sbFetch('strength_words?order=id.asc');
     customWords = (data||[]).map(w => ({ text: w.text, author: '', id: w.id }));
-  } catch(e) {
-    const saved = localStorage.getItem('tgj_words');
-    if (saved) customWords = JSON.parse(saved).map(t => ({ text: t, author: '' }));
-  }
+  } catch(e) {}
 }
 
 function getAllWords() {
   return [...DEFAULT_WORDS, ...customWords];
 }
 
-function setFeaturedWord(idx) {
-  featuredWordIdx = idx;
+function showWord(idx) {
   const words = getAllWords();
-  const w = words[idx % words.length];
-  document.getElementById('featuredQuoteText').innerHTML = '&#8220;' + w.text + '&#8221;';
-  document.getElementById('featuredAuthorText').textContent = w.author ? '— ' + w.author : '';
-  const fw = document.getElementById('featuredWord');
-  fw.style.animation = 'none'; void fw.offsetWidth; fw.style.animation = 'fadeUp .4s ease';
-  sfxClick();
-  renderWordsGrid();
+  currentWordIdx = ((idx % words.length) + words.length) % words.length;
+  const w = words[currentWordIdx];
+  const textEl = document.getElementById('strengthText');
+  const authorEl = document.getElementById('strengthAuthor');
+  const quote = document.getElementById('strengthQuote');
+  if (!textEl) return;
+  // Fade out then in
+  quote.style.opacity = '0';
+  quote.style.transform = 'translateY(10px)';
+  quote.style.transition = 'opacity .4s ease, transform .4s ease';
+  setTimeout(() => {
+    textEl.innerHTML = '&#8220;' + w.text + '&#8221;';
+    authorEl.textContent = w.author ? '— ' + w.author : '';
+    quote.style.opacity = '1';
+    quote.style.transform = 'translateY(0)';
+  }, 400);
+}
+
+function startWordRotation() {
+  if (strengthTimer) clearInterval(strengthTimer);
+  showWord(Math.floor(Math.random() * getAllWords().length));
+  strengthTimer = setInterval(() => {
+    showWord(Math.floor(Math.random() * getAllWords().length));
+  }, 8000);
 }
 
 async function renderWordsGrid() {
-  if (!customWords.length) await loadWords();
-  const grid = document.getElementById('wordsGrid');
-  if (!grid) return;
-  const words = getAllWords();
-  grid.innerHTML = words.map((w, i) => `
-    <div onclick="setFeaturedWord(${i})"
-      style="background:${i===featuredWordIdx?'rgba(196,154,60,0.08)':'rgba(255,255,255,0.65)'};
-             border:1px solid ${i===featuredWordIdx?'rgba(196,154,60,0.3)':'var(--panel-border)'};
-             border-radius:12px;padding:14px;cursor:pointer;transition:all .2s;
-             font-size:13px;color:${i===featuredWordIdx?'var(--text-dark)':'var(--text-light)'};
-             font-style:italic;line-height:1.5;text-align:center;
-             ${w.id?'position:relative':''}"
-      onmouseover="this.style.background='white';this.style.transform='translateY(-2px)'"
-      onmouseout="this.style.background='${i===featuredWordIdx?'rgba(196,154,60,0.08)':'rgba(255,255,255,0.65)'}';this.style.transform=''">
-      &#8220;${w.text.length>70?w.text.substring(0,70)+'...':w.text}&#8221;
-      ${w.id?`<button onclick="event.stopPropagation();deleteWord(${w.id})"
-        style="position:absolute;top:6px;right:6px;background:none;border:none;cursor:pointer;color:#ccc;font-size:14px;padding:2px 4px;opacity:0;transition:opacity .2s"
-        onmouseover="this.style.opacity='1';this.style.color='#e07070'" onmouseout="this.style.opacity='0'">×</button>`:''}
-    </div>
-  `).join('');
+  await loadWords();
+  startWordRotation();
 }
 
 function toggleWordsAdd() {
-  const form = document.getElementById('wordsAddForm');
+  const form = document.getElementById('strengthAddForm');
+  if (!form) return;
   form.style.display = form.style.display === 'none' ? 'block' : 'none';
   if (form.style.display === 'block') setTimeout(() => document.getElementById('wordTextField').focus(), 100);
   sfxClick();
@@ -2159,19 +2161,11 @@ async function addWord() {
     customWords.push({ text: saved.text, author: '', id: saved.id });
   } catch(e) {
     customWords.push({ text, author: '' });
-    localStorage.setItem('tgj_words', JSON.stringify(customWords.map(w=>w.text)));
   }
   field.value = '';
-  document.getElementById('wordsAddForm').style.display = 'none';
-  renderWordsGrid();
+  document.getElementById('strengthAddForm').style.display = 'none';
   sfxAccepted();
-}
-
-async function deleteWord(id) {
-  customWords = customWords.filter(w => w.id !== id);
-  try { await sbFetch(`strength_words?id=eq.${id}`, 'DELETE'); } catch(e) {}
-  renderWordsGrid();
-  sfxClick();
+  startWordRotation();
 }
 
 document.addEventListener('DOMContentLoaded', () => {
