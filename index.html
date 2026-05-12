@@ -227,17 +227,19 @@ body{min-height:100vh;font-family:'Crimson Pro',Georgia,serif;font-size:17px;col
 .pomo-full-panel{pointer-events:all;width:100%;max-width:480px;background:rgba(255,255,255,0.97);border-radius:24px 24px 0 0;box-shadow:0 -8px 40px rgba(42,82,152,0.15);backdrop-filter:blur(20px);padding:28px 28px 40px;animation:slideUpFull .4s cubic-bezier(.34,1.2,.64,1)}
 
 /* ── Slide Navigation ── */
-.app-slides{position:relative;overflow:hidden;width:100%}
-.slides-track{display:flex;transition:transform .4s cubic-bezier(.4,0,.2,1);will-change:transform}
-.slide{flex:0 0 100%;width:100%;min-height:100vh;padding:24px 16px 100px}
+.app-slides{position:fixed;inset:0;overflow:hidden;z-index:1}
+.slides-track{display:flex;height:100%;transition:transform .4s cubic-bezier(.4,0,.2,1);will-change:transform}
+.slide{flex:0 0 100%;width:100%;height:100%;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
+.slide::-webkit-scrollbar{width:4px}
+.slide::-webkit-scrollbar-thumb{background:var(--blue-pale);border-radius:2px}
 
 /* Dot indicators */
-.slide-dots{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:100;background:rgba(255,255,255,0.6);border:1px solid var(--panel-border);border-radius:20px;padding:6px 12px;backdrop-filter:blur(8px)}
+.slide-dots{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:200;background:rgba(255,255,255,0.6);border:1px solid var(--panel-border);border-radius:20px;padding:6px 12px;backdrop-filter:blur(8px)}
 .slide-dot{width:8px;height:8px;border-radius:50%;background:var(--blue-pale);cursor:pointer;transition:all .3s;border:none;padding:0}
 .slide-dot.active{background:var(--blue-mid);width:20px;border-radius:4px}
 
 /* Slide arrows (desktop) */
-.slide-arrow{position:fixed;top:50%;transform:translateY(-50%);z-index:100;background:rgba(255,255,255,0.7);border:1px solid var(--panel-border);border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:var(--text-light);transition:all .2s;backdrop-filter:blur(8px)}
+.slide-arrow{position:fixed;top:50%;transform:translateY(-50%);z-index:200;background:rgba(255,255,255,0.85);border:1px solid var(--panel-border);border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:var(--text-light);transition:all .2s;backdrop-filter:blur(8px)}
 .slide-arrow:hover{background:white;color:var(--blue-mid)}
 .slide-arrow.left{left:12px}
 .slide-arrow.right{right:12px}
@@ -293,8 +295,8 @@ body{min-height:100vh;font-family:'Crimson Pro',Georgia,serif;font-size:17px;col
 </style>
 </head>
 <body>
-<div class="sky"></div>
-<div class="motes" id="motes"></div>
+<div class="sky" style="z-index:0"></div>
+<div class="motes" id="motes" style="z-index:0"></div>
 
 <div id="passwordGate">
   <div class="gate-box">
@@ -310,7 +312,7 @@ body{min-height:100vh;font-family:'Crimson Pro',Georgia,serif;font-size:17px;col
 
 <button id="addFab" onclick="openNewQuestModal()">+</button>
 
-<div class="app-slides"><div class="slides-track" id="slidesTrack"><div class="slide" id="slide0"><div class="container" style="padding-bottom:80px">
+<div class="app-slides"><div class="slides-track" id="slidesTrack"><div class="slide" id="slide0"><div class="container" style="padding-bottom:100px;min-height:100%">
   <div class="header">
     <div class="date-display" id="dateDisplay"></div>
     <div class="header-ornament">✦ Hero's Record ✦</div>
@@ -544,7 +546,7 @@ body{min-height:100vh;font-family:'Crimson Pro',Georgia,serif;font-size:17px;col
 </div>
 
 <!-- Pomodoro Modal -->
-  <div id="pomoModal" style="position:fixed;inset:0;z-index:3000;display:none;align-items:flex-end;justify-content:center;pointer-events:none">
+  <div id="pomoModal" style="position:fixed;inset:0;z-index:4000;display:none;align-items:flex-end;justify-content:center;pointer-events:none">
     <!-- Minimized pill -->
     <div id="pomoPill" style="display:none;pointer-events:all;margin-bottom:24px;background:rgba(255,255,255,0.95);border:1px solid var(--panel-border);border-radius:40px;padding:8px 20px;box-shadow:0 4px 20px rgba(42,82,152,0.15);backdrop-filter:blur(12px);display:flex;align-items:center;gap:12px;cursor:pointer;animation:slideUp .3s ease" onclick="maximizePomo()">
       <canvas id="pomoMiniCanvas" width="28" height="28" style="flex-shrink:0"></canvas>
@@ -713,7 +715,7 @@ body{min-height:100vh;font-family:'Crimson Pro',Georgia,serif;font-size:17px;col
 </div>
 
 <!-- All Clear Overlay -->
-<div id="allClearOverlay">
+<div id="allClearOverlay" style="z-index:4500">
   <canvas id="allClearStars"></canvas>
   <div class="all-clear-box">
     <div class="all-clear-glyph">✦</div>
