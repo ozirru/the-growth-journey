@@ -10,6 +10,11 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Growth">
 <link rel="apple-touch-icon" href="/icon-192.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="shortcut icon" href="/favicon.ico">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -1016,6 +1021,72 @@ function initMotes(){
   }
 }
 
+// ── Indonesian Holidays 2026 ───────────────
+const HOLIDAYS_2026 = {
+  // Libur Nasional
+  '2026-01-01': 'Tahun Baru Masehi',
+  '2026-01-16': 'Isra Mikraj',
+  '2026-02-17': 'Tahun Baru Imlek',
+  '2026-03-19': 'Hari Suci Nyepi',
+  '2026-03-20': 'Idul Fitri 1447 H',
+  '2026-03-21': 'Idul Fitri 1447 H',
+  '2026-04-03': 'Wafat Yesus Kristus',
+  '2026-05-01': 'Hari Buruh',
+  '2026-05-14': 'Kenaikan Yesus Kristus',
+  '2026-05-27': 'Idul Adha 1447 H',
+  '2026-05-31': 'Hari Raya Waisak',
+  '2026-06-01': 'Hari Lahir Pancasila',
+  '2026-06-16': 'Tahun Baru Islam 1448 H',
+  '2026-08-17': 'Hari Kemerdekaan RI',
+  '2026-10-15': 'Maulid Nabi Muhammad SAW',
+  '2026-12-25': 'Hari Raya Natal',
+  // Cuti Bersama
+  '2026-02-16': '🌙 Cuti Bersama Imlek',
+  '2026-03-18': '🌙 Cuti Bersama Nyepi',
+  '2026-03-23': '🌙 Cuti Bersama Idul Fitri',
+  '2026-03-24': '🌙 Cuti Bersama Idul Fitri',
+  '2026-03-25': '🌙 Cuti Bersama Idul Fitri',
+  '2026-05-15': '🌙 Cuti Bersama Kenaikan',
+  '2026-05-28': '🌙 Cuti Bersama Idul Adha',
+  '2026-12-24': '🌙 Cuti Bersama Natal',
+};
+
+function isHoliday(ds) { return !!HOLIDAYS_2026[ds]; }
+function isCutiBersama(ds) { return HOLIDAYS_2026[ds]?.startsWith('🌙'); }
+function getHolidayName(ds) { return HOLIDAYS_2026[ds]?.replace('🌙 ', '') || ''; }
+
+function showHolidayTooltip(e, name) {
+  // Remove existing tooltip
+  const existing = document.getElementById('holTooltip');
+  if (existing) { existing.remove(); return; }
+
+  const tip = document.createElement('div');
+  tip.id = 'holTooltip';
+  tip.textContent = name;
+  tip.style.cssText = `
+    position:fixed;z-index:6000;
+    background:rgba(255,255,255,0.98);
+    border:1px solid rgba(224,112,112,0.3);
+    border-radius:8px;padding:6px 12px;
+    font-family:'Crimson Pro',serif;font-size:13px;
+    color:var(--text-dark);
+    box-shadow:0 4px 16px rgba(42,82,152,0.12);
+    pointer-events:none;
+    white-space:nowrap;
+  `;
+  document.body.appendChild(tip);
+
+  const rect = e.target.getBoundingClientRect();
+  const tipW = 200;
+  let left = rect.left + rect.width/2 - tipW/2;
+  left = Math.max(8, Math.min(left, window.innerWidth - tipW - 8));
+  tip.style.left = left + 'px';
+  tip.style.top = (rect.bottom + 6) + 'px';
+  tip.style.maxWidth = tipW + 'px';
+
+  setTimeout(() => tip.remove(), 2500);
+}
+
 // ── Day Slider ─────────────────────────────
 let currentDateOffset = 0; // 0 = today, 1 = tomorrow, -1 = yesterday
 let dayQuestCache = {};
@@ -1624,16 +1695,20 @@ async function applyRecurringQuests(today) {
     const recurring = await sbFetch('recurring_quests?order=id.asc');
     if (!recurring || !recurring.length) return;
 
-    const todayDow = new Date().getDay();
-    const todayBtn = todayDow === 0 ? 6 : todayDow - 1;
-    const existingNames = new Set(quests.map(q => q.name));
+    const d = new Date(today + 'T00:00:00');
+    const dow = d.getDay(); // 0=Sun
+    const todayBtn = dow === 0 ? 6 : dow - 1; // convert to Mon=0..Sun=6
+
+    // Check what already exists for today in DB (not just in memory)
+    const existing = await sbFetch(`quests?quest_date=eq.${today}&order=id.asc`);
+    const existingNames = new Set((existing || []).map(q => q.name));
 
     for (const r of recurring) {
       const days = r.days_of_week || [];
       if (!days.includes(todayBtn)) continue;
-      if (existingNames.has(r.name)) continue;
+      if (existingNames.has(r.name)) continue; // already exists for this date
 
-      // Add recurring quest for today
+      // Add recurring quest for this date
       const res = await sbFetch('quests', 'POST', {
         name: r.name,
         type: r.type,
@@ -1644,7 +1719,10 @@ async function applyRecurringQuests(today) {
         quest_date: today
       });
       const saved = Array.isArray(res) ? res[0] : res;
-      if (saved) quests.push(saved);
+      if (saved) {
+        existingNames.add(r.name); // prevent double-add in same session
+        if (today === todayStr()) quests.push(saved);
+      }
     }
   } catch(e) {
     console.error('Recurring quests error:', e);
@@ -1863,8 +1941,14 @@ async function renderWeek(){
   let html=`<div class="cal-day-headers"><div></div>`;
   dates.forEach((d,i)=>{
     const ds=d.toISOString().split('T')[0];
-    const isT=ds===todayStr(),isW=i>=5;
-    html+=`<div class="cal-day-header${isT?' today-h':''}${isW?' wkend-h':''}">${dN[i]}<span class="dn">${d.getDate()}</span></div>`;
+    const isT=ds===todayStr(),isW=i>=5,isHol=isHoliday(ds),isCuti=isCutiBersama(ds);
+    const holName=getHolidayName(ds);
+    const dotColor=isHol&&!isCuti?'#e07070':isCuti?'#c49a3c':'';
+    html+=`<div class="cal-day-header${isT?' today-h':''}${isW||isHol?' wkend-h':''}" title="${holName}" style="position:relative">
+      ${dN[i]}
+      <span class="dn">${d.getDate()}</span>
+      ${dotColor?`<span onclick="event.stopPropagation();showHolidayTooltip(event,'${holName}')" style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${dotColor};margin:2px auto 0;box-shadow:0 0 5px ${dotColor};cursor:pointer"></span>`:'<span style="display:block;height:8px"></span>'}
+    </div>`;
   });
   html+='</div>';
 
@@ -1936,10 +2020,15 @@ async function renderMonth(){
   for(let d=1;d<=last.getDate();d++){
     const dd=new Date(y,mo,d),ds=dd.toISOString().split('T')[0];
     const isT=ds===todayStr();
+    const isHol=isHoliday(ds);
+    const holName=getHolidayName(ds);
     const dq=mq.filter(q=>q.quest_date===ds).sort((a,b)=>(a.start_time||'99:99').localeCompare(b.start_time||'99:99'));
     const vis=dq.slice(0,3),more=dq.length-3;
-    html+=`<div class="month-cell${isT?' today-c':''}" onclick="setDateAndScroll('${ds}')">
-      <div class="month-date">${d}</div>
+    const isWeekend = dd.getDay()===0||dd.getDay()===6;
+    const cellColor = isHol ? 'rgba(255,230,230,0.8)' : isWeekend ? 'rgba(255,255,255,0.52)' : 'rgba(255,255,255,0.52)';
+    const dateColor = isHol ? '#e07070' : isT ? 'var(--blue-deep)' : isCutiBersama(ds) ? '#c49a3c' : 'var(--text-light)';
+    html+=`<div class="month-cell${isT?' today-c':''}" style="background:${isHol?'rgba(255,235,235,0.75)':''}" onclick="setDateAndScroll('${ds}')">
+      <div class="month-date" style="color:${dateColor}" title="${holName}">${d}${isHol?'<span style="display:block;font-size:7px;color:#e07070;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+holName.substring(0,12)+'</span>':''}</div>
       ${vis.map(q=>`<div class="mqi ${q.type}-i${q.status==='done'?' done-i':''}">${q.name}</div>`).join('')}
       ${more>0?`<div class="month-more">+${more}</div>`:''}
     </div>`;
