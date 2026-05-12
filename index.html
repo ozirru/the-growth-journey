@@ -231,7 +231,7 @@ body{min-height:100vh;font-family:'Crimson Pro',Georgia,serif;font-size:17px;col
 .slides-track{display:block}
 .slide{display:none;min-height:100vh}
 .slide.active{display:block}
-.slide-page{padding:24px 16px 60px;max-width:820px;margin:0 auto}
+.slide-page{padding:24px 16px 40px;max-width:820px;margin:0 auto}
 
 /* Dot indicators */
 .slide-dots{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:200;background:rgba(255,255,255,0.6);border:1px solid var(--panel-border);border-radius:20px;padding:6px 12px;backdrop-filter:blur(8px)}
@@ -318,7 +318,7 @@ body{min-height:100vh;font-family:'Crimson Pro',Georgia,serif;font-size:17px;col
   <button class="slide-dot" onclick="goToSlide(1)"></button>
   <button class="slide-dot" onclick="goToSlide(2)"></button>
 </div>
-<div class="app-slides"><div class="slides-track" id="slidesTrack"><div class="slide active" id="slide0"><div class="container" style="padding-bottom:60px">
+<div class="app-slides"><div class="slides-track" id="slidesTrack"><div class="slide active" id="slide0"><div class="container" style="padding-bottom:40px">
   <div class="header">
     <div class="date-display" id="dateDisplay"></div>
     <div class="header-ornament">✦ Hero's Record ✦</div>
@@ -524,21 +524,90 @@ body{min-height:100vh;font-family:'Crimson Pro',Georgia,serif;font-size:17px;col
   </div>
 </div>
 
-<!-- Pomodoro Trigger Button -->
-  <div style="text-align:center;margin-bottom:14px">
-    <button onclick="openPomoModal()" style="
-      background:rgba(255,255,255,0.7);
-      border:1px solid var(--panel-border);
-      color:var(--text-light);
-      border-radius:40px;
-      font-family:'Cinzel',serif;font-size:10px;font-weight:600;
-      letter-spacing:2px;padding:11px 28px;cursor:pointer;
-      transition:all .2s;backdrop-filter:blur(8px);
-    " onmouseover="this.style.background='white';this.style.color='var(--blue-mid)';this.style.borderColor='var(--blue-pale)'"
-       onmouseout="this.style.background='rgba(255,255,255,0.7)';this.style.color='var(--text-light)';this.style.borderColor='var(--panel-border)'">
-      ⏱ START FOCUS
-    </button>
+</div></div><!-- end slide0 container + slide0 -->
+
+<!-- Slide 2: Life Wishlist -->
+<div class="slide" id="slide1" style="background:linear-gradient(175deg,#a8c8f0 0%,#c0d8f5 18%,#d8ecff 38%,#e8f4ff 55%,#f4f9ff 72%,#fff 100%)">
+  <div class="slide-page">
+  <div class="bucket-header" style="text-align:center;margin-bottom:28px;padding-top:8px">
+    <div style="font-size:10px;letter-spacing:6px;color:var(--gold);text-transform:uppercase;margin-bottom:6px;opacity:.8">✦ Dream It ✦</div>
+    <div class="bucket-title">Life Wishlist</div>
+    <div class="bucket-sub">Things to have, do, see, and become.</div>
   </div>
+  <div class="bucket-grid" id="bucketGrid">
+    <div class="bucket-category" style="border-top:3px solid #f7c948">
+      <div class="bucket-cat-header">
+        <div class="bucket-cat-title" style="color:#a07828">Things to Buy</div>
+        <button class="bucket-add-btn" onclick="showBucketInput('buy')">+</button>
+      </div>
+      <div id="bucketList-buy"></div>
+      <div id="bucketInput-buy" style="display:none">
+        <div class="bucket-input-row">
+          <input class="bucket-input" id="bucketField-buy" placeholder="Add item..." autocomplete="off"/>
+          <button class="bucket-submit" onclick="addBucketItem('buy')">Add</button>
+        </div>
+      </div>
+    </div>
+    <div class="bucket-category" style="border-top:3px solid #4a7fd4">
+      <div class="bucket-cat-header">
+        <div class="bucket-cat-title" style="color:#2a5298">Things to Do</div>
+        <button class="bucket-add-btn" onclick="showBucketInput('do')">+</button>
+      </div>
+      <div id="bucketList-do"></div>
+      <div id="bucketInput-do" style="display:none">
+        <div class="bucket-input-row">
+          <input class="bucket-input" id="bucketField-do" placeholder="Add activity..." autocomplete="off"/>
+          <button class="bucket-submit" onclick="addBucketItem('do')">Add</button>
+        </div>
+      </div>
+    </div>
+    <div class="bucket-category" style="border-top:3px solid #5a9a6a">
+      <div class="bucket-cat-header">
+        <div class="bucket-cat-title" style="color:#3a7a4a">Places to Visit</div>
+        <button class="bucket-add-btn" onclick="showBucketInput('visit')">+</button>
+      </div>
+      <div id="bucketList-visit"></div>
+      <div id="bucketInput-visit" style="display:none">
+        <div class="bucket-input-row">
+          <input class="bucket-input" id="bucketField-visit" placeholder="Add place..." autocomplete="off"/>
+          <button class="bucket-submit" onclick="addBucketItem('visit')">Add</button>
+        </div>
+      </div>
+    </div>
+    <div class="bucket-category" style="border-top:3px solid #a78bfa">
+      <div class="bucket-cat-header">
+        <div class="bucket-cat-title" style="color:#7c5cbf">Achievements</div>
+        <button class="bucket-add-btn" onclick="showBucketInput('achieve')">+</button>
+      </div>
+      <div id="bucketList-achieve"></div>
+      <div id="bucketInput-achieve" style="display:none">
+        <div class="bucket-input-row">
+          <input class="bucket-input" id="bucketField-achieve" placeholder="Add goal..." autocomplete="off"/>
+          <button class="bucket-submit" onclick="addBucketItem('achieve')">Add</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div></div><!-- end slide1 -->
+
+<!-- Slide 3: Words of Strength -->
+<div class="slide" id="slide2" style="background:linear-gradient(175deg,#a8c8f0 0%,#c0d8f5 18%,#d8ecff 38%,#e8f4ff 55%,#f4f9ff 72%,#fff 100%)">
+  <div style="height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 24px">
+    
+    <div style="font-size:10px;letter-spacing:6px;color:var(--gold);text-transform:uppercase;margin-bottom:48px;opacity:.8;flex-shrink:0">✦ Keep Going ✦</div>
+    
+    <!-- Fixed-size quote box so position never jumps -->
+    <div style="width:100%;max-width:480px;flex-shrink:0;position:relative">
+      <div style="width:40px;height:1px;background:var(--gold);margin:0 auto 32px;border-radius:1px;opacity:.6"></div>
+      <div id="strengthQuote" style="min-height:160px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 8px">
+        <div id="strengthText" style="font-family:'Cinzel',serif;font-size:17px;font-weight:600;color:var(--text-dark);line-height:1.9;letter-spacing:0.5px;margin-bottom:20px;transition:opacity .4s ease,transform .4s ease"></div>
+        <div id="strengthAuthor" style="font-size:13px;color:var(--text-pale);font-style:italic;transition:opacity .4s ease"></div>
+      </div>
+      <div style="width:40px;height:1px;background:var(--gold);margin:32px auto 0;border-radius:1px;opacity:.6"></div>
+    </div>
+  </div></div><!-- end slide2 -->
+
+</div></div><!-- end slides-track + app-slides -->
 
 <!-- Pomodoro Modal -->
   <div id="pomoModal" style="position:fixed;inset:0;z-index:4000;display:none;align-items:flex-end;justify-content:center;pointer-events:none">
@@ -611,98 +680,7 @@ body{min-height:100vh;font-family:'Crimson Pro',Georgia,serif;font-size:17px;col
     </div>
   </div>
 
-</div></div><!-- end slide0 container + slide0 -->
 
-<!-- Slide 2: Life Wishlist -->
-<div class="slide" id="slide1" style="background:linear-gradient(175deg,#a8c8f0 0%,#c0d8f5 18%,#d8ecff 38%,#e8f4ff 55%,#f4f9ff 72%,#fff 100%)">
-  <div class="slide-page">
-  <div class="bucket-header" style="text-align:center;margin-bottom:28px;padding-top:8px">
-    <div style="font-size:10px;letter-spacing:6px;color:var(--gold);text-transform:uppercase;margin-bottom:6px;opacity:.8">✦ Dream It ✦</div>
-    <div class="bucket-title">Life Wishlist</div>
-    <div class="bucket-sub">Things to have, do, see, and become.</div>
-  </div>
-  <div class="bucket-grid" id="bucketGrid">
-    <div class="bucket-category" style="border-top:3px solid #f7c948">
-      <div class="bucket-cat-header">
-        <div class="bucket-cat-title" style="color:#a07828">Things to Buy</div>
-        <button class="bucket-add-btn" onclick="showBucketInput('buy')">+</button>
-      </div>
-      <div id="bucketList-buy"></div>
-      <div id="bucketInput-buy" style="display:none">
-        <div class="bucket-input-row">
-          <input class="bucket-input" id="bucketField-buy" placeholder="Add item..." autocomplete="off"/>
-          <button class="bucket-submit" onclick="addBucketItem('buy')">Add</button>
-        </div>
-      </div>
-    </div>
-    <div class="bucket-category" style="border-top:3px solid #4a7fd4">
-      <div class="bucket-cat-header">
-        <div class="bucket-cat-title" style="color:#2a5298">Things to Do</div>
-        <button class="bucket-add-btn" onclick="showBucketInput('do')">+</button>
-      </div>
-      <div id="bucketList-do"></div>
-      <div id="bucketInput-do" style="display:none">
-        <div class="bucket-input-row">
-          <input class="bucket-input" id="bucketField-do" placeholder="Add activity..." autocomplete="off"/>
-          <button class="bucket-submit" onclick="addBucketItem('do')">Add</button>
-        </div>
-      </div>
-    </div>
-    <div class="bucket-category" style="border-top:3px solid #5a9a6a">
-      <div class="bucket-cat-header">
-        <div class="bucket-cat-title" style="color:#3a7a4a">Places to Visit</div>
-        <button class="bucket-add-btn" onclick="showBucketInput('visit')">+</button>
-      </div>
-      <div id="bucketList-visit"></div>
-      <div id="bucketInput-visit" style="display:none">
-        <div class="bucket-input-row">
-          <input class="bucket-input" id="bucketField-visit" placeholder="Add place..." autocomplete="off"/>
-          <button class="bucket-submit" onclick="addBucketItem('visit')">Add</button>
-        </div>
-      </div>
-    </div>
-    <div class="bucket-category" style="border-top:3px solid #a78bfa">
-      <div class="bucket-cat-header">
-        <div class="bucket-cat-title" style="color:#7c5cbf">Achievements</div>
-        <button class="bucket-add-btn" onclick="showBucketInput('achieve')">+</button>
-      </div>
-      <div id="bucketList-achieve"></div>
-      <div id="bucketInput-achieve" style="display:none">
-        <div class="bucket-input-row">
-          <input class="bucket-input" id="bucketField-achieve" placeholder="Add goal..." autocomplete="off"/>
-          <button class="bucket-submit" onclick="addBucketItem('achieve')">Add</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div></div><!-- end slide1 -->
-
-<!-- Slide 3: Words of Strength -->
-<div class="slide" id="slide2" style="background:linear-gradient(175deg,#a8c8f0 0%,#c0d8f5 18%,#d8ecff 38%,#e8f4ff 55%,#f4f9ff 72%,#fff 100%)">
-  <div class="slide-page" style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">
-    
-    <div style="font-size:10px;letter-spacing:6px;color:var(--gold);text-transform:uppercase;margin-bottom:32px;opacity:.8">✦ Keep Going ✦</div>
-    
-    <!-- Featured rotating quote -->
-    <div id="strengthQuote" style="max-width:480px;padding:0 16px;margin-bottom:48px;animation:fadeUp .6s ease">
-      <div id="strengthText" style="font-family:'Cinzel',serif;font-size:18px;font-weight:600;color:var(--text-dark);line-height:1.8;letter-spacing:0.5px;margin-bottom:16px"></div>
-      <div style="width:40px;height:2px;background:var(--gold);margin:0 auto 16px;border-radius:1px"></div>
-      <div id="strengthAuthor" style="font-size:13px;color:var(--text-pale);font-style:italic"></div>
-    </div>
-
-    <!-- Add custom word -->
-    <div style="width:100%;max-width:400px">
-      <div id="strengthAddForm" style="display:none;margin-bottom:10px">
-        <div class="bucket-input-row">
-          <input class="bucket-input" id="wordTextField" placeholder="Your words of strength..." autocomplete="off" style="font-style:italic;text-align:center"/>
-          <button class="bucket-submit" onclick="addWord()">Add</button>
-        </div>
-      </div>
-      <button class="words-add-btn" onclick="toggleWordsAdd()">✦ ADD YOUR OWN WORDS</button>
-    </div>
-  </div></div><!-- end slide2 -->
-
-</div></div><!-- end slides-track + app-slides -->
 
   <div class="completion-overlay">
   <div class="particles" id="particles"></div>
@@ -2116,17 +2094,17 @@ function showWord(idx) {
   const w = words[currentWordIdx];
   const textEl = document.getElementById('strengthText');
   const authorEl = document.getElementById('strengthAuthor');
-  const quote = document.getElementById('strengthQuote');
   if (!textEl) return;
-  // Fade out then in
-  quote.style.opacity = '0';
-  quote.style.transform = 'translateY(10px)';
-  quote.style.transition = 'opacity .4s ease, transform .4s ease';
+  // Fade text only, not container (so position stays fixed)
+  textEl.style.opacity = '0';
+  textEl.style.transform = 'translateY(8px)';
+  if (authorEl) { authorEl.style.opacity = '0'; }
   setTimeout(() => {
     textEl.innerHTML = '&#8220;' + w.text + '&#8221;';
-    authorEl.textContent = w.author ? '— ' + w.author : '';
-    quote.style.opacity = '1';
-    quote.style.transform = 'translateY(0)';
+    if (authorEl) authorEl.textContent = w.author ? '— ' + w.author : '';
+    textEl.style.opacity = '1';
+    textEl.style.transform = 'translateY(0)';
+    if (authorEl) authorEl.style.opacity = '1';
   }, 400);
 }
 
@@ -2143,35 +2121,8 @@ async function renderWordsGrid() {
   startWordRotation();
 }
 
-function toggleWordsAdd() {
-  const form = document.getElementById('strengthAddForm');
-  if (!form) return;
-  form.style.display = form.style.display === 'none' ? 'block' : 'none';
-  if (form.style.display === 'block') setTimeout(() => document.getElementById('wordTextField').focus(), 100);
-  sfxClick();
-}
+// Words add functionality removed
 
-async function addWord() {
-  const field = document.getElementById('wordTextField');
-  const text = field.value.trim();
-  if (!text) return;
-  try {
-    const res = await sbFetch('strength_words', 'POST', { text });
-    const saved = Array.isArray(res) ? res[0] : res;
-    customWords.push({ text: saved.text, author: '', id: saved.id });
-  } catch(e) {
-    customWords.push({ text, author: '' });
-  }
-  field.value = '';
-  document.getElementById('strengthAddForm').style.display = 'none';
-  sfxAccepted();
-  startWordRotation();
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  const wf = document.getElementById('wordTextField');
-  if (wf) wf.addEventListener('keydown', e => { if (e.key === 'Enter') addWord(); });
-});
 
 // ── Init ───────────────────────────────────
 async function init() {
