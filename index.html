@@ -115,7 +115,7 @@ body{min-height:100vh;font-family:'Crimson Pro',Georgia,serif;font-size:17px;col
 .quest-panel.main .xp-pill{background:rgba(196,154,60,0.1);color:var(--main-quest);border:1px solid rgba(196,154,60,0.18)}
 .quest-panel.side .xp-pill{background:rgba(74,127,212,0.08);color:var(--side-quest);border:1px solid rgba(74,127,212,0.14)}
 
-.quest-item{background:rgba(255,255,255,0.72);border:1px solid rgba(180,210,240,0.5);border-radius:10px;padding:10px 12px;margin-bottom:7px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;user-select:none}
+.quest-item{background:rgba(255,255,255,0.72);border:1px solid rgba(180,210,240,0.5);border-radius:10px;padding:10px 12px;margin-bottom:7px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-moz-user-select:none;-ms-user-select:none;}
 .quest-item::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--blue-pale);border-radius:3px 0 0 3px}
 .quest-item:active{transform:scale(.98)}
 .quest-item.in-progress::before{background:var(--gold)}
@@ -225,6 +225,69 @@ body{min-height:100vh;font-family:'Crimson Pro',Georgia,serif;font-size:17px;col
 @keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
 @keyframes slideUpFull{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
 .pomo-full-panel{pointer-events:all;width:100%;max-width:480px;background:rgba(255,255,255,0.97);border-radius:24px 24px 0 0;box-shadow:0 -8px 40px rgba(42,82,152,0.15);backdrop-filter:blur(20px);padding:28px 28px 40px;animation:slideUpFull .4s cubic-bezier(.34,1.2,.64,1)}
+
+/* ── Slide Navigation ── */
+.app-slides{position:relative;overflow:hidden;width:100%}
+.slides-track{display:flex;transition:transform .4s cubic-bezier(.4,0,.2,1);will-change:transform}
+.slide{flex:0 0 100%;width:100%;min-height:100vh;padding:24px 16px 100px}
+
+/* Dot indicators */
+.slide-dots{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:100;background:rgba(255,255,255,0.6);border:1px solid var(--panel-border);border-radius:20px;padding:6px 12px;backdrop-filter:blur(8px)}
+.slide-dot{width:8px;height:8px;border-radius:50%;background:var(--blue-pale);cursor:pointer;transition:all .3s;border:none;padding:0}
+.slide-dot.active{background:var(--blue-mid);width:20px;border-radius:4px}
+
+/* Slide arrows (desktop) */
+.slide-arrow{position:fixed;top:50%;transform:translateY(-50%);z-index:100;background:rgba(255,255,255,0.7);border:1px solid var(--panel-border);border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:var(--text-light);transition:all .2s;backdrop-filter:blur(8px)}
+.slide-arrow:hover{background:white;color:var(--blue-mid)}
+.slide-arrow.left{left:12px}
+.slide-arrow.right{right:12px}
+@media(max-width:768px){.slide-arrow{display:none}}
+
+/* ── Slide 2: Bucket List ── */
+.bucket-header{text-align:center;margin-bottom:28px;padding-top:8px}
+.bucket-title{font-family:'Cinzel',serif;font-size:20px;font-weight:700;background:linear-gradient(135deg,var(--blue-deep),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:2px;margin-bottom:4px}
+.bucket-sub{font-size:13px;color:var(--text-light);font-style:italic}
+
+.bucket-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:560px){.bucket-grid{grid-template-columns:1fr}}
+
+.bucket-category{background:var(--panel-bg);border:1px solid var(--panel-border);border-radius:var(--radius);box-shadow:var(--shadow);backdrop-filter:blur(12px);padding:16px}
+.bucket-cat-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.bucket-cat-title{font-family:'Cinzel',serif;font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase}
+.bucket-add-btn{background:none;border:none;cursor:pointer;font-size:16px;color:var(--text-pale);transition:all .2s;padding:2px 6px;border-radius:6px}
+.bucket-add-btn:hover{background:rgba(74,127,212,0.08);color:var(--blue-mid)}
+
+.sticky-note{position:relative;border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:14px;line-height:1.4;cursor:pointer;transition:all .2s;border:none;width:100%;text-align:left;font-family:'Crimson Pro',serif}
+.sticky-note:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,0.08)}
+.sticky-note.done{opacity:.5;text-decoration:line-through}
+.sticky-note .check-mark{position:absolute;top:8px;right:8px;font-size:11px}
+.sticky-note .delete-btn{position:absolute;top:6px;right:6px;background:none;border:none;cursor:pointer;opacity:0;font-size:12px;transition:opacity .2s;padding:2px}
+.sticky-note:hover .delete-btn{opacity:0.5}
+
+.bucket-input-row{display:flex;gap:6px;margin-top:8px}
+.bucket-input{flex:1;background:rgba(255,255,255,0.8);border:1px solid rgba(180,210,240,0.5);border-radius:8px;padding:7px 10px;font-family:'Crimson Pro',serif;font-size:14px;color:var(--text-dark);outline:none}
+.bucket-input:focus{border-color:var(--blue-light)}
+.bucket-submit{background:var(--blue-mid);color:white;border:none;border-radius:8px;padding:7px 12px;cursor:pointer;font-size:12px;transition:all .2s;flex-shrink:0}
+.bucket-submit:hover{background:var(--blue-deep)}
+
+/* ── Slide 3: Words of Strength ── */
+.words-container{min-height:80vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 0}
+.words-header{text-align:center;margin-bottom:32px}
+.words-title{font-family:'Cinzel',serif;font-size:20px;font-weight:700;background:linear-gradient(135deg,var(--blue-deep),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:2px;margin-bottom:4px}
+.words-sub{font-size:13px;color:var(--text-light);font-style:italic}
+
+.featured-word{text-align:center;max-width:480px;margin:0 auto 40px;padding:32px 24px;background:var(--panel-bg);border:1px solid rgba(196,154,60,0.2);border-radius:20px;box-shadow:var(--shadow);backdrop-filter:blur(12px);animation:fadeUp .5s ease}
+.featured-quote{font-family:'Cinzel',serif;font-size:15px;font-weight:600;color:var(--text-dark);line-height:1.7;letter-spacing:0.5px;margin-bottom:12px}
+.featured-author{font-size:13px;color:var(--text-pale);font-style:italic}
+
+.words-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;width:100%;max-width:640px}
+.word-card{background:rgba(255,255,255,0.65);border:1px solid var(--panel-border);border-radius:12px;padding:14px;cursor:pointer;transition:all .2s;font-size:13px;color:var(--text-light);font-style:italic;line-height:1.5;text-align:center}
+.word-card:hover{background:white;transform:translateY(-2px);box-shadow:0 4px 16px rgba(42,82,152,0.1);color:var(--text-dark)}
+.word-card.featured-card{border-color:rgba(196,154,60,0.3);color:var(--text-mid)}
+
+.words-add-section{width:100%;max-width:480px;margin-top:24px}
+.words-add-btn{width:100%;background:rgba(255,255,255,0.6);border:1px dashed var(--panel-border);border-radius:12px;padding:12px;font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--text-pale);cursor:pointer;transition:all .2s}
+.words-add-btn:hover{background:white;color:var(--text-light);border-color:var(--blue-pale)}
 ::-webkit-scrollbar{width:5px}
 ::-webkit-scrollbar-thumb{background:var(--blue-pale);border-radius:3px}
 </style>
@@ -247,7 +310,7 @@ body{min-height:100vh;font-family:'Crimson Pro',Georgia,serif;font-size:17px;col
 
 <button id="addFab" onclick="openNewQuestModal()">+</button>
 
-<div class="container">
+<div class="app-slides"><div class="slides-track" id="slidesTrack"><div class="slide" id="slide0"><div class="container" style="padding-bottom:80px">
   <div class="header">
     <div class="date-display" id="dateDisplay"></div>
     <div class="header-ornament">✦ Hero's Record ✦</div>
@@ -469,7 +532,18 @@ body{min-height:100vh;font-family:'Crimson Pro',Georgia,serif;font-size:17px;col
     </button>
   </div>
 
-  <!-- Pomodoro Modal -->
+  <!-- Slide Navigation Arrows -->
+<button class="slide-arrow left" onclick="goToSlide(currentSlide-1)">‹</button>
+<button class="slide-arrow right" onclick="goToSlide(currentSlide+1)">›</button>
+
+<!-- Slide Dots -->
+<div class="slide-dots" id="slideDots">
+  <button class="slide-dot active" onclick="goToSlide(0)"></button>
+  <button class="slide-dot" onclick="goToSlide(1)"></button>
+  <button class="slide-dot" onclick="goToSlide(2)"></button>
+</div>
+
+<!-- Pomodoro Modal -->
   <div id="pomoModal" style="position:fixed;inset:0;z-index:3000;display:none;align-items:flex-end;justify-content:center;pointer-events:none">
     <!-- Minimized pill -->
     <div id="pomoPill" style="display:none;pointer-events:all;margin-bottom:24px;background:rgba(255,255,255,0.95);border:1px solid var(--panel-border);border-radius:40px;padding:8px 20px;box-shadow:0 4px 20px rgba(42,82,152,0.15);backdrop-filter:blur(12px);display:flex;align-items:center;gap:12px;cursor:pointer;animation:slideUp .3s ease" onclick="maximizePomo()">
@@ -482,8 +556,8 @@ body{min-height:100vh;font-family:'Crimson Pro',Georgia,serif;font-size:17px;col
 
     <!-- Full modal -->
     <div id="pomoFull" class="pomo-full-panel">
-      <!-- Handle bar -->
-      <div style="width:36px;height:4px;background:var(--blue-pale);border-radius:2px;margin:0 auto 20px;cursor:pointer" onclick="minimizePomo()"></div>
+      <!-- Handle bar — tap or swipe down to minimize -->
+      <div id="pomoHandle" style="width:36px;height:4px;background:var(--blue-pale);border-radius:2px;margin:0 auto 20px;cursor:pointer;touch-action:none" onclick="minimizePomo()"></div>
       
       <!-- Header -->
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
@@ -539,6 +613,99 @@ body{min-height:100vh;font-family:'Crimson Pro',Georgia,serif;font-size:17px;col
       </div>
     </div>
   </div>
+
+</div></div><!-- end slide0 container + slide0 -->
+
+<!-- Slide 2: Life Wishlist -->
+<div class="slide" id="slide1" style="padding:24px 16px 100px;position:relative;z-index:2">
+  <div class="bucket-header" style="text-align:center;margin-bottom:28px;padding-top:8px">
+    <div style="font-size:10px;letter-spacing:6px;color:var(--gold);text-transform:uppercase;margin-bottom:6px;opacity:.8">✦ Dream It ✦</div>
+    <div class="bucket-title">Life Wishlist</div>
+    <div class="bucket-sub">Things to have, do, see, and become.</div>
+  </div>
+  <div class="bucket-grid" id="bucketGrid">
+    <div class="bucket-category" style="border-top:3px solid #f7c948">
+      <div class="bucket-cat-header">
+        <div class="bucket-cat-title" style="color:#a07828">Things to Buy</div>
+        <button class="bucket-add-btn" onclick="showBucketInput('buy')">+</button>
+      </div>
+      <div id="bucketList-buy"></div>
+      <div id="bucketInput-buy" style="display:none">
+        <div class="bucket-input-row">
+          <input class="bucket-input" id="bucketField-buy" placeholder="Add item..." autocomplete="off"/>
+          <button class="bucket-submit" onclick="addBucketItem('buy')">Add</button>
+        </div>
+      </div>
+    </div>
+    <div class="bucket-category" style="border-top:3px solid #4a7fd4">
+      <div class="bucket-cat-header">
+        <div class="bucket-cat-title" style="color:#2a5298">Things to Do</div>
+        <button class="bucket-add-btn" onclick="showBucketInput('do')">+</button>
+      </div>
+      <div id="bucketList-do"></div>
+      <div id="bucketInput-do" style="display:none">
+        <div class="bucket-input-row">
+          <input class="bucket-input" id="bucketField-do" placeholder="Add activity..." autocomplete="off"/>
+          <button class="bucket-submit" onclick="addBucketItem('do')">Add</button>
+        </div>
+      </div>
+    </div>
+    <div class="bucket-category" style="border-top:3px solid #5a9a6a">
+      <div class="bucket-cat-header">
+        <div class="bucket-cat-title" style="color:#3a7a4a">Places to Visit</div>
+        <button class="bucket-add-btn" onclick="showBucketInput('visit')">+</button>
+      </div>
+      <div id="bucketList-visit"></div>
+      <div id="bucketInput-visit" style="display:none">
+        <div class="bucket-input-row">
+          <input class="bucket-input" id="bucketField-visit" placeholder="Add place..." autocomplete="off"/>
+          <button class="bucket-submit" onclick="addBucketItem('visit')">Add</button>
+        </div>
+      </div>
+    </div>
+    <div class="bucket-category" style="border-top:3px solid #a78bfa">
+      <div class="bucket-cat-header">
+        <div class="bucket-cat-title" style="color:#7c5cbf">Achievements</div>
+        <button class="bucket-add-btn" onclick="showBucketInput('achieve')">+</button>
+      </div>
+      <div id="bucketList-achieve"></div>
+      <div id="bucketInput-achieve" style="display:none">
+        <div class="bucket-input-row">
+          <input class="bucket-input" id="bucketField-achieve" placeholder="Add goal..." autocomplete="off"/>
+          <button class="bucket-submit" onclick="addBucketItem('achieve')">Add</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div><!-- end slide1 -->
+
+<!-- Slide 3: Words of Strength -->
+<div class="slide" id="slide2" style="padding:24px 16px 100px;position:relative;z-index:2">
+  <div style="min-height:80vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 0">
+    <div style="text-align:center;margin-bottom:28px">
+      <div style="font-size:10px;letter-spacing:6px;color:var(--gold);text-transform:uppercase;margin-bottom:6px;opacity:.8">✦ Keep Going ✦</div>
+      <div class="words-title">Words of Strength</div>
+      <div class="words-sub">Tap a word to feature it. Add your own.</div>
+    </div>
+    <div class="featured-word" id="featuredWord" style="text-align:center;max-width:480px;width:90%;margin:0 auto 32px;padding:28px 24px;background:var(--panel-bg);border:1px solid rgba(196,154,60,0.2);border-radius:20px;box-shadow:var(--shadow);backdrop-filter:blur(12px)">
+      <div id="featuredQuoteText" style="font-family:'Cinzel',serif;font-size:14px;font-weight:600;color:var(--text-dark);line-height:1.8;letter-spacing:0.5px;margin-bottom:10px">&#8220;You are capable of more than you know.&#8221;</div>
+      <div id="featuredAuthorText" style="font-size:13px;color:var(--text-pale);font-style:italic">— Your future self</div>
+    </div>
+    <div id="wordsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;width:100%;max-width:640px;margin-bottom:20px"></div>
+    <div style="width:100%;max-width:480px">
+      <div id="wordsAddForm" style="display:none;margin-bottom:10px">
+        <div class="bucket-input-row">
+          <input class="bucket-input" id="wordTextField" placeholder="Your words of strength..." autocomplete="off" style="font-style:italic"/>
+          <button class="bucket-submit" onclick="addWord()">Add</button>
+        </div>
+      </div>
+      <button class="words-add-btn" onclick="toggleWordsAdd()">✦ ADD YOUR OWN WORDS</button>
+    </div>
+  </div>
+</div><!-- end slide2 -->
+
+</div><!-- end slides-track -->
+</div><!-- end app-slides -->
 
   <div class="completion-overlay">
   <div class="particles" id="particles"></div>
@@ -1673,6 +1840,41 @@ function openPomoModal() {
   drawPomoRing(1);
   updatePomoSessionDots();
   updatePomoDisplay();
+  initPomoSwipe();
+}
+
+function initPomoSwipe() {
+  const panel = document.getElementById('pomoFull');
+  let startY = 0, currentY = 0, isDragging = false;
+
+  panel.addEventListener('touchstart', e => {
+    // Only start drag from top 60px (handle area)
+    if (e.touches[0].clientY - panel.getBoundingClientRect().top > 60) return;
+    startY = e.touches[0].clientY;
+    isDragging = true;
+    panel.style.transition = 'none';
+  }, { passive: true });
+
+  panel.addEventListener('touchmove', e => {
+    if (!isDragging) return;
+    currentY = e.touches[0].clientY;
+    const delta = Math.max(0, currentY - startY);
+    panel.style.transform = `translateY(${delta}px)`;
+  }, { passive: true });
+
+  panel.addEventListener('touchend', () => {
+    if (!isDragging) return;
+    isDragging = false;
+    panel.style.transition = '';
+    const delta = currentY - startY;
+    if (delta > 80) {
+      panel.style.transform = '';
+      minimizePomo();
+    } else {
+      panel.style.transform = '';
+    }
+    startY = 0; currentY = 0;
+  });
 }
 
 function closePomoModal() {
@@ -1721,6 +1923,242 @@ function initPomo() {
     Notification.requestPermission();
   }
 }
+
+// ── Slides ────────────────────────────────
+let currentSlide = 0;
+const TOTAL_SLIDES = 3;
+let slideStartX = 0, slideStartY = 0, slideDragging = false;
+
+function goToSlide(idx) {
+  if (idx < 0 || idx >= TOTAL_SLIDES) return;
+  currentSlide = idx;
+  document.getElementById('slidesTrack').style.transform = `translateX(-${idx * 100}%)`;
+  document.querySelectorAll('.slide-dot').forEach((d,i) => {
+    d.classList.toggle('active', i === idx);
+  });
+  sfxClick();
+  if (idx === 1) renderBucketLists();
+  if (idx === 2) renderWordsGrid();
+}
+
+// Touch swipe between slides
+const track = document.getElementById('slidesTrack');
+if (track) {
+  track.addEventListener('touchstart', e => {
+    slideStartX = e.touches[0].clientX;
+    slideStartY = e.touches[0].clientY;
+    slideDragging = true;
+  }, { passive: true });
+
+  track.addEventListener('touchend', e => {
+    if (!slideDragging) return;
+    slideDragging = false;
+    const dx = e.changedTouches[0].clientX - slideStartX;
+    const dy = e.changedTouches[0].clientY - slideStartY;
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
+      goToSlide(dx < 0 ? currentSlide + 1 : currentSlide - 1);
+    }
+  });
+}
+
+// ── Bucket List ───────────────────────────
+const BUCKET_COLORS = {
+  buy:     { bg:'#fffbeb', border:'rgba(247,201,72,0.3)', text:'#6b5000' },
+  do:      { bg:'#eff6ff', border:'rgba(74,127,212,0.25)', text:'#1e3a5f' },
+  visit:   { bg:'#f0fdf4', border:'rgba(90,154,106,0.25)', text:'#1a4a2a' },
+  achieve: { bg:'#f5f3ff', border:'rgba(167,139,250,0.25)', text:'#4a3080' },
+};
+
+let bucketItems = { buy:[], do:[], visit:[], achieve:[] };
+
+async function loadBucketItems() {
+  try {
+    const data = await sbFetch('bucket_items?order=id.asc');
+    bucketItems = { buy:[], do:[], visit:[], achieve:[] };
+    (data||[]).forEach(item => {
+      if (bucketItems[item.category]) bucketItems[item.category].push(item);
+    });
+  } catch(e) {
+    const saved = localStorage.getItem('tgj_bucket');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      Object.keys(parsed).forEach(cat => {
+        bucketItems[cat] = parsed[cat].map(i => ({ id: i.id, text: i.text, done: i.done, category: cat }));
+      });
+    }
+  }
+}
+
+function showBucketInput(cat) {
+  const inp = document.getElementById('bucketInput-' + cat);
+  inp.style.display = inp.style.display === 'none' ? 'block' : 'none';
+  if (inp.style.display === 'block') setTimeout(() => document.getElementById('bucketField-' + cat).focus(), 100);
+  sfxClick();
+}
+
+async function addBucketItem(cat) {
+  const field = document.getElementById('bucketField-' + cat);
+  const text = field.value.trim();
+  if (!text) return;
+  try {
+    const res = await sbFetch('bucket_items', 'POST', { category: cat, text, done: false });
+    const saved = Array.isArray(res) ? res[0] : res;
+    bucketItems[cat].push(saved);
+  } catch(e) {
+    const item = { id: Date.now(), category: cat, text, done: false };
+    bucketItems[cat].push(item);
+  }
+  field.value = '';
+  document.getElementById('bucketInput-' + cat).style.display = 'none';
+  renderBucketList(cat);
+  sfxAccepted();
+}
+
+async function toggleBucketItem(cat, id) {
+  const item = bucketItems[cat]?.find(i => i.id === id);
+  if (!item) return;
+  item.done = !item.done;
+  try { await sbFetch(`bucket_items?id=eq.${id}`, 'PATCH', { done: item.done }); } catch(e) {}
+  renderBucketList(cat);
+  sfxClick();
+}
+
+async function deleteBucketItem(cat, id) {
+  bucketItems[cat] = bucketItems[cat]?.filter(i => i.id !== id) || [];
+  try { await sbFetch(`bucket_items?id=eq.${id}`, 'DELETE'); } catch(e) {}
+  renderBucketList(cat);
+  sfxClick();
+}
+
+function renderBucketList(cat) {
+  const list = document.getElementById('bucketList-' + cat);
+  if (!list) return;
+  const colors = BUCKET_COLORS[cat];
+  const items = bucketItems[cat] || [];
+  const active = items.filter(i => !i.done);
+  const done = items.filter(i => i.done);
+  const sorted = [...active, ...done];
+  list.innerHTML = sorted.length ? sorted.map(item => `
+    <div style="position:relative;background:${item.done?'rgba(240,248,240,0.6)':colors.bg};border:1px solid ${item.done?'rgba(90,154,106,0.2)':colors.border};border-radius:8px;padding:9px 32px 9px 12px;margin-bottom:6px;cursor:pointer;transition:all .2s;font-size:14px;color:${item.done?'#aaa':colors.text};text-decoration:${item.done?'line-through':'none'};font-family:'Crimson Pro',serif"
+         onclick="toggleBucketItem('${cat}',${item.id})">
+      ${item.done?'✓ ':''}${item.text}
+      <button onclick="event.stopPropagation();deleteBucketItem('${cat}',${item.id})"
+        style="position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#ccc;font-size:16px;padding:2px 6px;line-height:1;transition:color .2s"
+        onmouseover="this.style.color='#e07070'" onmouseout="this.style.color='#ccc'">×</button>
+    </div>
+  `).join('') : '<div style="font-size:13px;color:var(--text-pale);font-style:italic;padding:8px 0;text-align:center">Nothing yet...</div>';
+}
+
+async function renderBucketLists() {
+  await loadBucketItems();
+  ['buy','do','visit','achieve'].forEach(renderBucketList);
+}
+
+['buy','do','visit','achieve'].forEach(cat => {
+  setTimeout(() => {
+    const field = document.getElementById('bucketField-' + cat);
+    if (field) field.addEventListener('keydown', e => { if (e.key === 'Enter') addBucketItem(cat); });
+  }, 500);
+});
+
+// ── Words of Strength ─────────────────────
+const DEFAULT_WORDS = [
+  { text: "You are capable of more than you know.", author: "Your future self" },
+  { text: "Every step forward counts, no matter how small.", author: "" },
+  { text: "Progress, not perfection.", author: "" },
+  { text: "The harder you work, the greater you feel when you achieve it.", author: "" },
+  { text: "Believe in yourself and all that you are.", author: "" },
+  { text: "You have survived every hard day so far.", author: "" },
+];
+
+let customWords = [];
+let featuredWordIdx = 0;
+
+async function loadWords() {
+  try {
+    const data = await sbFetch('strength_words?order=id.asc');
+    customWords = (data||[]).map(w => ({ text: w.text, author: '', id: w.id }));
+  } catch(e) {
+    const saved = localStorage.getItem('tgj_words');
+    if (saved) customWords = JSON.parse(saved).map(t => ({ text: t, author: '' }));
+  }
+}
+
+function getAllWords() {
+  return [...DEFAULT_WORDS, ...customWords];
+}
+
+function setFeaturedWord(idx) {
+  featuredWordIdx = idx;
+  const words = getAllWords();
+  const w = words[idx % words.length];
+  document.getElementById('featuredQuoteText').innerHTML = '&#8220;' + w.text + '&#8221;';
+  document.getElementById('featuredAuthorText').textContent = w.author ? '— ' + w.author : '';
+  const fw = document.getElementById('featuredWord');
+  fw.style.animation = 'none'; void fw.offsetWidth; fw.style.animation = 'fadeUp .4s ease';
+  sfxClick();
+  renderWordsGrid();
+}
+
+async function renderWordsGrid() {
+  if (!customWords.length) await loadWords();
+  const grid = document.getElementById('wordsGrid');
+  if (!grid) return;
+  const words = getAllWords();
+  grid.innerHTML = words.map((w, i) => `
+    <div onclick="setFeaturedWord(${i})"
+      style="background:${i===featuredWordIdx?'rgba(196,154,60,0.08)':'rgba(255,255,255,0.65)'};
+             border:1px solid ${i===featuredWordIdx?'rgba(196,154,60,0.3)':'var(--panel-border)'};
+             border-radius:12px;padding:14px;cursor:pointer;transition:all .2s;
+             font-size:13px;color:${i===featuredWordIdx?'var(--text-dark)':'var(--text-light)'};
+             font-style:italic;line-height:1.5;text-align:center;
+             ${w.id?'position:relative':''}"
+      onmouseover="this.style.background='white';this.style.transform='translateY(-2px)'"
+      onmouseout="this.style.background='${i===featuredWordIdx?'rgba(196,154,60,0.08)':'rgba(255,255,255,0.65)'}';this.style.transform=''">
+      &#8220;${w.text.length>70?w.text.substring(0,70)+'...':w.text}&#8221;
+      ${w.id?`<button onclick="event.stopPropagation();deleteWord(${w.id})"
+        style="position:absolute;top:6px;right:6px;background:none;border:none;cursor:pointer;color:#ccc;font-size:14px;padding:2px 4px;opacity:0;transition:opacity .2s"
+        onmouseover="this.style.opacity='1';this.style.color='#e07070'" onmouseout="this.style.opacity='0'">×</button>`:''}
+    </div>
+  `).join('');
+}
+
+function toggleWordsAdd() {
+  const form = document.getElementById('wordsAddForm');
+  form.style.display = form.style.display === 'none' ? 'block' : 'none';
+  if (form.style.display === 'block') setTimeout(() => document.getElementById('wordTextField').focus(), 100);
+  sfxClick();
+}
+
+async function addWord() {
+  const field = document.getElementById('wordTextField');
+  const text = field.value.trim();
+  if (!text) return;
+  try {
+    const res = await sbFetch('strength_words', 'POST', { text });
+    const saved = Array.isArray(res) ? res[0] : res;
+    customWords.push({ text: saved.text, author: '', id: saved.id });
+  } catch(e) {
+    customWords.push({ text, author: '' });
+    localStorage.setItem('tgj_words', JSON.stringify(customWords.map(w=>w.text)));
+  }
+  field.value = '';
+  document.getElementById('wordsAddForm').style.display = 'none';
+  renderWordsGrid();
+  sfxAccepted();
+}
+
+async function deleteWord(id) {
+  customWords = customWords.filter(w => w.id !== id);
+  try { await sbFetch(`strength_words?id=eq.${id}`, 'DELETE'); } catch(e) {}
+  renderWordsGrid();
+  sfxClick();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const wf = document.getElementById('wordTextField');
+  if (wf) wf.addEventListener('keydown', e => { if (e.key === 'Enter') addWord(); });
+});
 
 // ── Init ───────────────────────────────────
 async function init() {
